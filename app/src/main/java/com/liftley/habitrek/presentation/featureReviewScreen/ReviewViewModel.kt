@@ -3,9 +3,9 @@ package com.liftley.habitrek.presentation.featureReviewScreen
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.liftley.habitrek.domain.model.HabitStatus
 import com.liftley.habitrek.domain.repository.HabitRepository
 import com.liftley.habitrek.domain.usecase.GetHabitCompletionsUseCase
-import com.liftley.habitrek.domain.usecase.HabitStatus
 import com.liftley.habitrek.domain.usecase.ToggleHabitCompletionUseCase
 import com.liftley.habitrek.presentation.featureReviewScreen.model.ReviewUiState
 import com.liftley.habitrek.presentation.featureReviewScreen.model.toDomain

@@ -1,6 +1,7 @@
 [versions]
 accompanistPermissions = "0.37.3"
 agp = "9.1.0"
+converterGson = "3.0.0"
 hiltAndroid = "2.59.2"
 hiltNavigationCompose = "1.3.0"
 kotlin = "2.3.20"
@@ -15,7 +16,8 @@ nav3Core = "1.1.0"
 lifecycleViewmodelNav3 = "2.10.0"
 kotlinSerialization = "2.3.20"
 kotlinxSerializationCore = "1.10.0"
-material3AdaptiveNav3 = "1.3.0-alpha10"
+material3AdaptiveNav3 = "1.3.0-alpha08"
+retrofit = "3.0.0"
 roomRuntime = "2.8.4"
 
 [libraries]
@@ -24,6 +26,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -53,6 +56,7 @@ androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.
 
 # ViewModel
 lifecycle-viewmodel-compose = {group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx"}
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

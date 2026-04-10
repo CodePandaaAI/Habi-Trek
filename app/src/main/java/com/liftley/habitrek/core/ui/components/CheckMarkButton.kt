@@ -33,11 +33,11 @@ fun CheckMarkButton(
     isHabitCompletedToday: () -> Boolean,
     actualElementSize: Dp,
     iconsSize: Dp,
-    habitColor: () -> Color,
+    habitColor: Color,
     onClickListener: () -> Unit
 ) {
     val isHabitCompletedToday = isHabitCompletedToday()
-    val habitColor = habitColor()
+    val habitColor = habitColor
     /*
     Variables for Simple scaleX and scaleY animation for shrinking and expanding of CheckMark Button
      */

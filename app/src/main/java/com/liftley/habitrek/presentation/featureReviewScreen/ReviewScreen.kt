@@ -176,7 +176,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                 isHabitCompletedToday = { habit.isCompletedToday },
                 actualElementSize = 64.dp,
                 iconsSize = 32.dp,
-                habitColor = { habitColor }
+                habitColor = habitColor
             ) {
                 reviewViewModel.toggleHabitCompletion(dateMillis = todayDate)
             }

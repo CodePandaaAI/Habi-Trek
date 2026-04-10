@@ -1,5 +1,6 @@
 package com.liftley.habitrek.domain.usecase
 
+import com.liftley.habitrek.domain.model.HabitStatus
 import com.liftley.habitrek.domain.repository.CompletionRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -22,8 +23,3 @@ class GetHabitCompletionsUseCase @Inject constructor(private val completionRepos
         }
     }
 }
-
-data class HabitStatus(
-    val completedTimestamps: Set<Long>,
-    val isCompletedToday: Boolean
-)

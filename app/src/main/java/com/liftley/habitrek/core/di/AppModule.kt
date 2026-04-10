@@ -2,11 +2,12 @@ package com.liftley.habitrek.core.di
 
 import android.content.Context
 import androidx.room.Room
-import com.liftley.habitrek.data.local.dao.AddHabitDao
-import com.liftley.habitrek.data.local.dao.HabitsDao
-import com.liftley.habitrek.data.local.dao.ReviewHabitDao
+import com.liftley.habitrek.data.local.dao.CompletionDao
+import com.liftley.habitrek.data.local.dao.HabitDao
 import com.liftley.habitrek.data.local.database.HabitTrackerAppDatabase
 import com.liftley.habitrek.data.remote.api.SearchApi
+import com.liftley.habitrek.data.repository.HabitRepositoryImpl
+import com.liftley.habitrek.domain.repository.HabitRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,15 +31,11 @@ object ApplicationModule {
 
     @Provides
     @Singleton
-    fun providesHabitsDao(database: HabitTrackerAppDatabase): HabitsDao = database.habitsDao()
+    fun providesHabitsDao(database: HabitTrackerAppDatabase): HabitDao = database.habitDao()
 
     @Provides
     @Singleton
-    fun providesAddHabitDao(database: HabitTrackerAppDatabase): AddHabitDao = database.addHabitDao()
-
-    @Provides
-    @Singleton
-    fun providesReviewHabitDao(database: HabitTrackerAppDatabase): ReviewHabitDao = database.reviewHabitDao()
+    fun providesCompletionDao(database: HabitTrackerAppDatabase): CompletionDao = database.completionDao()
 
     @Provides
     @Singleton
