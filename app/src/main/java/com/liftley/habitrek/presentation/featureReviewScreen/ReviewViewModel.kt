@@ -3,7 +3,6 @@ package com.liftley.habitrek.presentation.featureReviewScreen
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liftley.habitrek.domain.model.HabitStatus
 import com.liftley.habitrek.domain.repository.HabitRepository
 import com.liftley.habitrek.domain.usecase.GetHabitCompletionsUseCase
 import com.liftley.habitrek.domain.usecase.ToggleHabitCompletionUseCase
@@ -17,10 +16,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -69,22 +66,20 @@ class ReviewViewModel @AssistedInject constructor(
 
     fun startObservingHabitCompletions() {
         viewModelScope.launch {
-            val habitStatus: StateFlow<HabitStatus?> = getHabitCompletionsUseCase(habitId)
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000),
-                    initialValue = null
-                )
-            _mutableState.update { currentState ->
-                currentState.copy(
-                    habitCompletions = habitStatus.value?.completedTimestamps ?: emptySet(),
-                    habitUiModel = currentState.habitUiModel.copy(
-                        isCompletedToday = habitStatus.value?.isCompletedToday ?: false
+            // Actively listen (collect) to database changes
+            getHabitCompletionsUseCase(habitId).collect { habitStatus ->
+                _mutableState.update { currentState ->
+                    currentState.copy(
+                        habitCompletions = habitStatus.completedTimestamps,
+                        habitUiModel = currentState.habitUiModel.copy(
+                            isCompletedToday = habitStatus.isCompletedToday
+                        )
                     )
-                )
+                }
             }
         }
     }
+
 
     fun changeMonth(monthsToAdd: Long) {
         _mutableState.update { currentState ->

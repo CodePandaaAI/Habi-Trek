@@ -1,7 +1,6 @@
 package com.liftley.habitrek.presentation.featureReviewScreen.model
 
 import androidx.compose.ui.graphics.Color
-import com.liftley.habitrek.domain.model.Habit
 import java.time.YearMonth
 
 data class ReviewUiState(

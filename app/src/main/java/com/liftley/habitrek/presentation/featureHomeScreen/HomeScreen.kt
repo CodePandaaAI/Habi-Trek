@@ -16,14 +16,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.R
-import com.liftley.habitrek.presentation.featureHomeScreen.components.HabitCard
 import com.liftley.habitrek.core.designSystem.theme.LiftleyTheme
+import com.liftley.habitrek.presentation.featureHomeScreen.components.HabitCard
 
 @Composable
 fun HomScreen(onHabitClick: (Int) -> Unit) {
@@ -49,39 +49,29 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
             }
 
         }
-    }
-    else {
+    } else {
         LazyColumn(
             Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            itemsIndexed(uiState.habits) { index, habit ->
-                val topBottomDp: Pair<Dp, Dp> = when {
-                    index == 0 -> {
-                        if (uiState.habits.size > 1) {
-                            Pair(24.dp, 8.dp)
-                        } else {
-                            Pair(24.dp, 24.dp)
-                        }
-                    }
+            itemsIndexed(
+                items = uiState.habits,
+                key = { _, habit -> habit.id }
+            ) { index, habit ->
+                val topRounding = if (index == 0) 24.dp else 8.dp
+                val bottomRounding = if (index == uiState.habits.lastIndex) 24.dp else 8.dp
 
-                    index < uiState.habits.size - 1 -> {
-                        Pair(8.dp, 8.dp)
-                    }
-
-                    else -> {
-                        Pair(8.dp, 24.dp)
-                    }
-                }
+                val finalColor =
+                    if (habit.color == Color(0L)) MaterialTheme.colorScheme.primary else habit.color
                 HabitCard(
                     habitName = habit.name,
                     habitDurationMinutes = habit.durationMinutes,
-                    habitColor = habit.color,
+                    habitColor = finalColor,
                     isCompletedToday = habit.isCompletedToday,
-                    topRounding = topBottomDp.first,
-                    bottomRounding = topBottomDp.second,
+                    topRounding = topRounding,
+                    bottomRounding = bottomRounding,
                     onClickListener = { onHabitClick(habit.id) },
                     onCompletedClick = { homeViewModel.toggleHabitCompletion(habit.id) }
                 )

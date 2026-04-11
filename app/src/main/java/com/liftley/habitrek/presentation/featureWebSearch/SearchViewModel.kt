@@ -2,7 +2,7 @@ package com.liftley.habitrek.presentation.featureWebSearch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liftley.habitrek.data.repository.SearchRepositoryImpl
+import com.liftley.habitrek.domain.repository.SearchRepository
 import com.liftley.habitrek.presentation.featureWebSearch.model.SearchScreenState
 import com.liftley.habitrek.presentation.featureWebSearch.model.toSearchScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val repository: SearchRepositoryImpl
+    private val repository: SearchRepository
 ) : ViewModel() {
 
     private val _mutableState: MutableStateFlow<SearchScreenState> =

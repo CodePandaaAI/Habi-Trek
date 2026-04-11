@@ -175,7 +175,7 @@ fun HabitCard(
 
             }
             CheckMarkButton(
-                isHabitCompletedToday = { isCompletedToday },
+                isHabitCompletedToday = isCompletedToday,
                 actualElementSize = 48.dp,
                 iconsSize = 24.dp,
                 habitColor = habitColor ,

@@ -1,8 +1,8 @@
 package com.liftley.habitrek.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Upsert
 import com.liftley.habitrek.data.local.entity.HabitEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -13,7 +13,7 @@ interface HabitDao {
     - If id = 0 → inserts new Habit
     - If id exists → updates that Habit
      */
-    @Insert
+    @Upsert
     suspend fun upsertHabit(habitEntity: HabitEntity)
 
     /*

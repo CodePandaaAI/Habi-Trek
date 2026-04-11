@@ -30,14 +30,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CheckMarkButton(
-    isHabitCompletedToday: () -> Boolean,
+    isHabitCompletedToday: Boolean,
     actualElementSize: Dp,
     iconsSize: Dp,
     habitColor: Color,
     onClickListener: () -> Unit
 ) {
-    val isHabitCompletedToday = isHabitCompletedToday()
-    val habitColor = habitColor
     /*
     Variables for Simple scaleX and scaleY animation for shrinking and expanding of CheckMark Button
      */

@@ -173,7 +173,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                 )
             }
             CheckMarkButton(
-                isHabitCompletedToday = { habit.isCompletedToday },
+                isHabitCompletedToday = habit.isCompletedToday,
                 actualElementSize = 64.dp,
                 iconsSize = 32.dp,
                 habitColor = habitColor
@@ -186,11 +186,11 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
         // 2. METRICS SHOWCASE ROW
         // ----------------------------------------
         Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             MetricCard(
-                modifier = Modifier,
+                modifier = Modifier.weight(0.65f),
                 title = "Daily Goal",
                 value = hoursAndMinutes,
                 icon = painterResource(R.drawable.outline_access_time_24),
@@ -198,7 +198,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
             )
 
             MetricCard(
-                modifier = Modifier,
+                modifier = Modifier.weight(0.35f),
                 title = "Total Days",
                 value = "$completionsTotal",
                 icon = painterResource(R.drawable.outline_local_fire_department_24),
