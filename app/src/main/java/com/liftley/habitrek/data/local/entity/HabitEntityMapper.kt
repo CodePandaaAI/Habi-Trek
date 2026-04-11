@@ -9,7 +9,7 @@ fun Habit.toEntity(): HabitEntity {
     return HabitEntity(
         id = id,
         name = name,
-        color = color.color,
+        color = color.color.toLong(),
         durationMinutes = durationMinutes,
     )
 }
@@ -18,7 +18,7 @@ fun HabitEntity.toDomain(): Habit {
     return Habit(
         id = id,
         name = name,
-        color = HabitColor(color),
+        color = HabitColor(color.toULong()),
         isCompletedToday = false,
         durationMinutes = durationMinutes,
     )
@@ -30,7 +30,7 @@ fun Flow<List<HabitEntity>>.toFlowHabitList(): Flow<List<Habit>> {
             Habit(
                 id = entity.id,
                 name = entity.name,
-                color = HabitColor(entity.color),
+                color = HabitColor(entity.color.toULong()),
                 isCompletedToday = false,
                 durationMinutes = entity.durationMinutes
             )

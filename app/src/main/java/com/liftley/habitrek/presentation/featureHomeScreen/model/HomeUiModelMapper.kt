@@ -8,7 +8,7 @@ fun List<Habit>.toHomeUiModelList(): List<HomeUiModel> {
         HomeUiModel(
             id = habit.id,
             name = habit.name,
-            color = Color(habit.color.color.toULong()),
+            color = Color(habit.color.color),
             isCompletedToday = habit.isCompletedToday,
             durationMinutes = habit.durationMinutes
         )
