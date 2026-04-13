@@ -124,7 +124,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
 
     val completionsTotal = remember(uiState) { uiState.habitCompletions.size } // Total streak count
 
-    val currentYearMonth = reviewViewModel.currentYearMonth
+    val currentYearMonth = uiState.currentYearMonth
 
     val todayDate = reviewViewModel.todayDate
 

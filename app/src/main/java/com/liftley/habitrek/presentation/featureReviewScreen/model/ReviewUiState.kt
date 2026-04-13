@@ -14,5 +14,8 @@ data class ReviewUiState(
         color = Color(0UL),
         isCompletedToday = false,
         durationMinutes = 0
-    )
+    ),
+
+    // Current Year and Month Tracking for Calendar UI
+    val currentYearMonth: YearMonth = YearMonth.now()
 )

@@ -57,7 +57,6 @@ class ReviewViewModel @AssistedInject constructor(
     private val _mutableState = MutableStateFlow(ReviewUiState())
     val state: StateFlow<ReviewUiState> = _mutableState.asStateFlow()
 
-
     private var nameUpdateJob: Job? = null
 
     private var colorUpdateJob: Job? = null
@@ -65,10 +64,6 @@ class ReviewViewModel @AssistedInject constructor(
     private var dateUpdateJob: Job? = null
 
     private val clickMutex = Mutex()
-
-    // Current Year and Month Tracking for month and year navigation and Calendar UI
-    var currentYearMonth: YearMonth = YearMonth.now()
-        private set
 
     // Today's Date as per UTC
     val todayDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -86,13 +81,8 @@ class ReviewViewModel @AssistedInject constructor(
         startObservingHabitCompletions()
     }
 
-    /*
-    Flow that observes all habit completions till date and continuously Updates UI(To Keep it accurate)
-    */
-
     fun startObservingHabitCompletions() {
         viewModelScope.launch {
-            // Actively listen (collect) to database changes
             getHabitCompletionsUseCase(habitId).collect { habitStatus ->
                 _mutableState.update { currentState ->
                     currentState.copy(
@@ -108,7 +98,12 @@ class ReviewViewModel @AssistedInject constructor(
 
 
     fun changeYearMonth(monthsToAdd: Long) {
-        currentYearMonth.plusMonths(monthsToAdd)
+        _mutableState.update { currentState ->
+            // plusMonths returns a NEW instance that we now save to Trigger UI modification
+            currentState.copy(
+                currentYearMonth = currentState.currentYearMonth.plusMonths(monthsToAdd)
+            )
+        }
     }
 
     // Updating Habit Data
@@ -184,10 +179,9 @@ class ReviewViewModel @AssistedInject constructor(
     }
 
     fun currentYearMonthName(): String = "${
-        currentYearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    } ${currentYearMonth.year}"
+        state.value.currentYearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
+    } ${state.value.currentYearMonth.year}"
 
-    // Factory provides hilt the habitId parameter which is a runtime value
     @AssistedFactory
     interface Factory {
         fun create(habitId: Int): ReviewViewModel
