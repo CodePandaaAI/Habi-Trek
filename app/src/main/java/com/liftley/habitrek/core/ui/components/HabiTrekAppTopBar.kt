@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -20,16 +16,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.liftley.habitrek.core.ui.navigation.NavRoutes
+import com.liftley.habitrek.core.ui.navigation.NavigationViewModel
+
+@Composable
+fun HabiTrekTopBarSelector(navigationViewModel: NavigationViewModel) {
+    when {
+        navigationViewModel.checkStack(NavRoutes.Home) || navigationViewModel.checkStack(
+            NavRoutes.SearchScreen
+        ) -> {
+            HabiTrekTopBarWithoutIconButton { "Habi Trek" }
+        }
+
+        navigationViewModel.checkStack(NavRoutes.AddHabit) -> {
+            HabiTrekTopBarWithIconButton(onBack = { navigationViewModel.removeScreen() }) { "Add Habit" }
+        }
+
+        else -> {
+            HabiTrekTopBarWithIconButton(onBack = { navigationViewModel.removeScreen() }) { "Review Habit" }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppTopBar(title: () -> String) {
+fun HabiTrekTopBarWithoutIconButton(title: () -> String) {
     TopAppBar(
         title = {
-            TopBarTitleBox { title() }
+            HabiTrekTopBarTitleBox { title() }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     )
@@ -37,10 +53,10 @@ fun AppTopBar(title: () -> String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppTopBarWithBackButton(onBack: () -> Unit = {}, title: () -> String) {
+fun HabiTrekTopBarWithIconButton(onBack: () -> Unit = {}, title: () -> String) {
     TopAppBar(
         title = {
-            TopBarTitleBox { title() }
+            HabiTrekTopBarTitleBox { title() }
         },
         navigationIcon = {
             ExpressiveIconButton(
@@ -54,7 +70,7 @@ fun AppTopBarWithBackButton(onBack: () -> Unit = {}, title: () -> String) {
 }
 
 @Composable
-fun TopBarTitleBox(title: () -> String) {
+fun HabiTrekTopBarTitleBox(title: () -> String) {
     Box(
         Modifier
             .clip(MaterialTheme.shapes.extraLarge)
@@ -72,22 +88,5 @@ fun TopBarTitleBox(title: () -> String) {
                 style = MaterialTheme.typography.titleMedium
             )
         }
-    }
-}
-
-@Composable
-fun ExpressiveIconButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    imageVector: ImageVector,
-    color: IconButtonColors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface),
-    contentDescription: String?
-) {
-    IconButton(
-        onClick = onClick,
-        modifier = modifier.height(48.dp),
-        colors = color
-    ) {
-        Icon(imageVector, contentDescription)
     }
 }

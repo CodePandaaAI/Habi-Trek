@@ -6,7 +6,7 @@ import com.liftley.habitrek.domain.repository.HabitRepository
 import jakarta.inject.Inject
 
 class CreateHabitUseCase @Inject constructor(private val habitRepository: HabitRepository) {
-    suspend operator fun invoke(habitName: String, habitColor: Long, durationMinutes: Int) {
+    suspend operator fun invoke(habitName: String, habitColor: ULong, durationMinutes: Int) {
         if (habitName.isEmpty() || durationMinutes <= 0) return
 
         habitRepository.upsertHabit(

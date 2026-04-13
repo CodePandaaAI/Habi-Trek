@@ -39,7 +39,7 @@ class AddHabitViewModel @Inject constructor(private val createHabitUseCase: Crea
         val durationMinutes = state.value.habitUiModel.durationMinutes
 
         viewModelScope.launch {
-            createHabitUseCase(habitName, habitColor.value.toLong(), durationMinutes)
+            createHabitUseCase(habitName, habitColor.value.toULong(), durationMinutes)
         }
     }
 }
