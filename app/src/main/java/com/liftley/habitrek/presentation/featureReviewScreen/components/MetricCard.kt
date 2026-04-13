@@ -27,7 +27,6 @@ fun MetricCard(
     title: String,
     value: String,
     icon: Painter,
-    habitColor: Color
 ) {
     Card(
         modifier = modifier.height(104.dp),
@@ -48,8 +47,7 @@ fun MetricCard(
                 Icon(
                     painter = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = habitColor
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = title,
@@ -60,7 +58,6 @@ fun MetricCard(
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-                color = habitColor
             )
         }
     }

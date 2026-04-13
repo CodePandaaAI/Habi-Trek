@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.R
 import com.liftley.habitrek.core.ui.components.HabiTrekSurface
-import com.liftley.habitrek.core.ui.components.HabiTrekSectionThubnail
+import com.liftley.habitrek.core.ui.components.HabiTrekSectionThumbnail
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.ColorBall
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.HabitCardPreview
 import com.liftley.habitrek.presentation.util.toDurationString
@@ -47,16 +47,17 @@ import com.liftley.habitrek.presentation.util.toDurationString
 @Composable
 fun AddHabitScreen(onAddHabitClick: () -> Unit) {
     val addHabitViewModel = hiltViewModel<AddHabitViewModel>()
-    val state by addHabitViewModel.state.collectAsState()
+    val addHabitUiState by addHabitViewModel.state.collectAsState()
 
-    val newHabitName = state.habitUiModel.name
-    val habitPalette = state.habitPalette
-    val newHabitColor = state.habitUiModel.color
-    val newHabitDurationMinutes = state.habitUiModel.durationMinutes
+    val newHabitName = addHabitUiState.habitUiModel.name
+    val newHabitColor = addHabitUiState.habitUiModel.color
+    val defaultColor = Color(0UL)
+    val newHabitDurationMinutes = addHabitUiState.habitUiModel.durationMinutes
 
     val habitDurationInHoursAndMinutes = newHabitDurationMinutes.toDurationString()
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         Modifier
             .padding(16.dp)
@@ -76,12 +77,10 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    HabiTrekSectionThubnail(
+                    HabiTrekSectionThumbnail(
                         contentDescription = "Habit Name",
                         imageVector = painterResource(R.drawable.outline_heart_smile_24),
-                        color = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
-                            newHabitColor
-
+                        color = if (newHabitColor == defaultColor) MaterialTheme.colorScheme.primary else newHabitColor
                     )
                     Text(
                         "Name your habit",
@@ -125,11 +124,10 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    HabiTrekSectionThubnail(
+                    HabiTrekSectionThumbnail(
                         contentDescription = "Allocated Time",
                         imageVector = painterResource(R.drawable.outline_access_time_24),
-                        color = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
-                            newHabitColor
+                        color = if (newHabitColor == defaultColor) MaterialTheme.colorScheme.primary else newHabitColor
 
                     )
                     Text(
@@ -146,7 +144,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     OutlinedTextField(
                         value = if (newHabitDurationMinutes == 0) "" else newHabitDurationMinutes.toString(),
                         onValueChange = { newValue ->
-                            addHabitViewModel.onDurationChange(newValue)
+                            addHabitViewModel.onHabitDurationChange(newValue)
                         },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
@@ -165,7 +163,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                             .height(56.dp)
                             .weight(1f)
                             .clip(RoundedCornerShape(24.dp))
-                            .background(newHabitColor.copy(0.1f))
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Text(
                             habitDurationInHoursAndMinutes,
@@ -189,11 +187,10 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    HabiTrekSectionThubnail(
+                    HabiTrekSectionThumbnail(
                         contentDescription = "Color Selector",
                         imageVector = painterResource(R.drawable.baseline_color_theme_24),
-                        color = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
-                            newHabitColor
+                        color = if (newHabitColor == defaultColor) MaterialTheme.colorScheme.primary else newHabitColor
                     )
                     Text(
                         "Choose a color",
@@ -208,15 +205,15 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    habitPalette.forEachIndexed { index, colorLong ->
-                        ColorBall(colorLong, state.habitUiModel.color == Color(colorLong)) {
-                            addHabitViewModel.onColorChange(index)
+                    AddHabitViewModel.habitPalette.forEachIndexed { index, colorULong ->
+                        ColorBall(colorULong, newHabitColor == Color(colorULong)) {
+                            addHabitViewModel.onHabitColorChange(index)
                         }
                     }
                 }
 
                 Button(
-                    onClick = { addHabitViewModel.onColorChange(0) },
+                    onClick = { addHabitViewModel.onHabitColorChange(0) },
                     Modifier.fillMaxWidth()
                 ) {
                     Text("Use System Default Color Scheme")
@@ -240,9 +237,8 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                 HabitCardPreview(
                     habitName = newHabitName,
                     habitDurationMinutes = newHabitDurationMinutes,
-                    surfaceColor = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
-                        newHabitColor,
-                    textColor = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.onPrimary else Color.Black
+                    surfaceColor = if (newHabitColor == defaultColor) MaterialTheme.colorScheme.primary else newHabitColor,
+                    textColor = if (newHabitColor == defaultColor) MaterialTheme.colorScheme.onPrimary else Color.Black
                 )
             }
         }

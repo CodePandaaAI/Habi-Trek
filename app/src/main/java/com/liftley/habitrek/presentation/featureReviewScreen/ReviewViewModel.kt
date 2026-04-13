@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneOffset
 
 @HiltViewModel(assistedFactory = ReviewViewModel.Factory::class)
@@ -32,10 +33,30 @@ class ReviewViewModel @AssistedInject constructor(
     private val toggleHabitCompletionUseCase: ToggleHabitCompletionUseCase,
     private val getHabitCompletionsUseCase: GetHabitCompletionsUseCase
 ) : ViewModel() {
+
+    companion object {
+        val habitPalette: List<ULong> = listOf(
+            0UL,
+            0xFFE57373UL,
+            0xFFF06292UL,
+            0xFFBA68C8UL,
+            0xFF9575CDUL,
+            0xFF7986CBUL,
+            0xFF64B5F6UL,
+            0xFF4FC3F7UL,
+            0xFF4DD0E1UL,
+            0xFF4DB6ACUL,
+            0xFF81C784UL,
+            0xFFAED581UL,
+            0xFFDCE775UL,
+            0xFFFFD54FUL,
+            0xFFFFB74DUL
+        )
+    }
+
     private val _mutableState = MutableStateFlow(ReviewUiState())
     val state: StateFlow<ReviewUiState> = _mutableState.asStateFlow()
 
-    val todayDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
     private var nameUpdateJob: Job? = null
 
@@ -45,15 +66,20 @@ class ReviewViewModel @AssistedInject constructor(
 
     private val clickMutex = Mutex()
 
-    // Initial Data Loading
+    // Current Year and Month Tracking for month and year navigation and Calendar UI
+    var currentYearMonth: YearMonth = YearMonth.now()
+        private set
 
+    // Today's Date as per UTC
+    val todayDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+
+    // Initial Data Loading
     init {
         viewModelScope.launch {
             val habit = habitRepository.getHabitWithId(habitId)
             _mutableState.update { currentState ->
                 currentState.copy(
-                    habitUiModel = habit.toReviewUiModel(),
-                    todayDate = todayDate
+                    habitUiModel = habit.toReviewUiModel()
                 )
             }
         }
@@ -81,11 +107,8 @@ class ReviewViewModel @AssistedInject constructor(
     }
 
 
-    fun changeMonth(monthsToAdd: Long) {
-        _mutableState.update { currentState ->
-            val newYearMonth = currentState.currentYearMonth.plusMonths(monthsToAdd)
-            currentState.copy(currentYearMonth = newYearMonth)
-        }
+    fun changeYearMonth(monthsToAdd: Long) {
+        currentYearMonth.plusMonths(monthsToAdd)
     }
 
     // Updating Habit Data
@@ -107,15 +130,17 @@ class ReviewViewModel @AssistedInject constructor(
         }
     }
 
-    fun updateNewHabitDuration(duration: Int) {
-        val time = if (duration > 1440) 0 else duration
+    fun updateNewHabitDuration(newValue: String) {
+        val value = newValue.filter { it.isDigit() }.toIntOrNull() ?: 0
+        val durationMinutes = if (value !in 0..1440) 0 else value
+
         _mutableState.update { currentState ->
             currentState.copy(
-                habitUiModel = currentState.habitUiModel.copy(durationMinutes = time)
+                habitUiModel = currentState.habitUiModel.copy(durationMinutes = durationMinutes)
             )
         }
 
-        if (time == 0) return
+        if (durationMinutes == 0) return
         dateUpdateJob?.cancel()
         dateUpdateJob = viewModelScope.launch {
             delay(700)
@@ -125,9 +150,9 @@ class ReviewViewModel @AssistedInject constructor(
         }
     }
 
-    fun updateNewHabitColor(index: Int) {
+    fun updateHabitColor(index: Int) {
         _mutableState.update { currentState ->
-            val color = state.value.habitPalette[index]
+            val color = habitPalette[index]
             currentState.copy(
                 habitUiModel = currentState.habitUiModel.copy(color = Color(color))
             )
@@ -159,8 +184,8 @@ class ReviewViewModel @AssistedInject constructor(
     }
 
     fun currentYearMonthName(): String = "${
-        state.value.currentYearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    } ${state.value.currentYearMonth.year}"
+        currentYearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
+    } ${currentYearMonth.year}"
 
     // Factory provides hilt the habitId parameter which is a runtime value
     @AssistedFactory

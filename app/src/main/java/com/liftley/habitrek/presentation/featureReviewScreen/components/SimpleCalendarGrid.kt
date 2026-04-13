@@ -2,6 +2,7 @@ package com.liftley.habitrek.presentation.featureReviewScreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.YearMonth
@@ -29,6 +31,11 @@ fun SimpleCalendarGrid(
     habitColor: Color,
     onDayClick: (Long) -> Unit
 ) {
+    val isLight = habitColor.luminance() > 0.6f
+    val textColor =
+        if (isLight && !isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface
+        else MaterialTheme.colorScheme.surface
+
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value
     val emptyBoxesBefore = firstDayOfWeek - 1
@@ -36,8 +43,7 @@ fun SimpleCalendarGrid(
     val totalRows = (totalBoxes + 6) / 7
 
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Aesthetic Touch: Weekday headers ("M", "T", "W"...)
@@ -89,7 +95,7 @@ fun SimpleCalendarGrid(
                         ) {
                             Text(
                                 text = dayNumber.toString(),
-                                color = if (isCompleted) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                                color = textColor,
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(8.dp)
                             )

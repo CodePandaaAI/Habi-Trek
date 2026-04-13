@@ -5,6 +5,6 @@ import androidx.compose.ui.graphics.Color
 data class AddHabitUiModel(
     val id: Int = 0,
     val name: String = "",
-    val color: Color,
+    val color: Color = Color(0UL),
     val durationMinutes: Int = 0
 )

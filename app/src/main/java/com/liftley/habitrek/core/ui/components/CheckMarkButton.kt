@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CheckMarkButton(
     isHabitCompletedToday: Boolean,
-    actualElementSize: Dp,
+    buttonSize: Dp,
     iconsSize: Dp,
     habitColor: Color,
     onClickListener: () -> Unit
@@ -59,7 +59,7 @@ fun CheckMarkButton(
                 scaleX = scaleAnimation.value
                 scaleY = scaleAnimation.value
             }
-            .size(actualElementSize)
+            .size(buttonSize)
             .clip(CircleShape)
             .border(2.dp, habitColor, shape = CircleShape)
             .background(color = toggleColor)

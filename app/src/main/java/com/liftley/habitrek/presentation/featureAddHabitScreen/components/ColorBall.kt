@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ColorBall(color: Long, isSelected: Boolean = false, onClick: () -> Unit = {}) {
+fun ColorBall(colorULong: ULong, isSelected: Boolean = false, onClick: () -> Unit = {}) {
     Box(
         Modifier
             .size(58.dp)
@@ -34,7 +34,7 @@ fun ColorBall(color: Long, isSelected: Boolean = false, onClick: () -> Unit = {}
                 Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(color = if(color == 0L) MaterialTheme.colorScheme.primary else Color(color))
+                    .background(color = if(colorULong == 0UL) MaterialTheme.colorScheme.primary else Color(colorULong))
             )
         }
     }
