@@ -47,7 +47,7 @@ fun HabitCardPreview(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = habitName,
+                    text = habitName.ifBlank { "Morning Yoga" },
                     style = MaterialTheme.typography.titleLarge,
                     color = textColor,
                     modifier = Modifier
