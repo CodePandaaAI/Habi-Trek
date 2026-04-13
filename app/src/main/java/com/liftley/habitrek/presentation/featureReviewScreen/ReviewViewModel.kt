@@ -37,20 +37,20 @@ class ReviewViewModel @AssistedInject constructor(
     companion object {
         val habitPalette: List<ULong> = listOf(
             0UL,
-            0xFFE57373UL,
-            0xFFF06292UL,
-            0xFFBA68C8UL,
-            0xFF9575CDUL,
-            0xFF7986CBUL,
-            0xFF64B5F6UL,
-            0xFF4FC3F7UL,
-            0xFF4DD0E1UL,
-            0xFF4DB6ACUL,
-            0xFF81C784UL,
-            0xFFAED581UL,
-            0xFFDCE775UL,
-            0xFFFFD54FUL,
-            0xFFFFB74DUL
+            Color(0xFFE57373).value,
+            Color(0xFFF06292).value,
+            Color(0xFFBA68C8).value,
+            Color(0xFF9575CD).value,
+            Color(0xFF7986CB).value,
+            Color(0xFF64B5F6).value,
+            Color(0xFF4FC3F7).value,
+            Color(0xFF4DD0E1).value,
+            Color(0xFF4DB6AC).value,
+            Color(0xFF81C784).value,
+            Color(0xFFAED581).value,
+            Color(0xFFDCE775).value,
+            Color(0xFFFFD54F).value,
+            Color(0xFFFFB74D).value
         )
     }
 

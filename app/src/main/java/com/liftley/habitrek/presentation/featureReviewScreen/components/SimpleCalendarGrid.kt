@@ -2,7 +2,6 @@ package com.liftley.habitrek.presentation.featureReviewScreen.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,11 +30,6 @@ fun SimpleCalendarGrid(
     habitColor: Color,
     onDayClick: (Long) -> Unit
 ) {
-    val isLight = habitColor.luminance() > 0.6f
-    val textColor =
-        if (isLight && !isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface
-        else MaterialTheme.colorScheme.surface
-
     val daysInMonth = currentMonth.lengthOfMonth()
     val firstDayOfWeek = currentMonth.atDay(1).dayOfWeek.value
     val emptyBoxesBefore = firstDayOfWeek - 1
@@ -84,6 +78,14 @@ fun SimpleCalendarGrid(
                             date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
                         val isCompleted = completedDates.contains(dateMillis)
+
+                        val isLight = habitColor.luminance() > 0.6f
+                        val textColor =
+                            when {
+                                !isCompleted -> MaterialTheme.colorScheme.onSurface
+                                isLight -> Color.Black
+                                else -> Color.White
+                            }
 
                         Box(
                             modifier = Modifier

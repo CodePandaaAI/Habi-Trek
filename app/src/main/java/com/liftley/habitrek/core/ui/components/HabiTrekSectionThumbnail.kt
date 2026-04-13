@@ -1,7 +1,6 @@
 package com.liftley.habitrek.core.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,8 +26,8 @@ fun HabiTrekSectionThumbnail(
 ) {
     val isLight = color.luminance() > 0.6f
     val iconColor =
-        if (isLight && !isSystemInDarkTheme()) MaterialTheme.colorScheme.onSurface
-        else MaterialTheme.colorScheme.surface
+        if (isLight) Color.Black
+        else Color.White
 
     Box(
         modifier = Modifier
