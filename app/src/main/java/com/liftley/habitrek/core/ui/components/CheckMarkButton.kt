@@ -51,7 +51,7 @@ fun CheckMarkButton(
             if (isHabitCompletedToday) habitColor
             else MaterialTheme.colorScheme.surface,
         animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "HeroToggleColor"
+        label = "Toggle Check Mark Button Color"
     )
     Box(
         Modifier

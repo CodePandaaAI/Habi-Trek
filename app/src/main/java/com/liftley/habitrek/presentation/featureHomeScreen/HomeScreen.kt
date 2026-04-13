@@ -40,12 +40,12 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                 val topRounding = if (index == 0) 24.dp else 8.dp
                 val bottomRounding = if (index == uiState.habits.lastIndex) 24.dp else 8.dp
 
-                val finalColor =
-                    if (habit.color == Color(0L)) MaterialTheme.colorScheme.primary else habit.color
+                val habitColor =
+                    if (habit.color == Color(0UL)) MaterialTheme.colorScheme.primary else habit.color
                 HabitCard(
                     habitName = habit.name,
                     habitDurationMinutes = habit.durationMinutes,
-                    habitColor = finalColor,
+                    habitColor = habitColor,
                     isCompletedToday = habit.isCompletedToday,
                     topRounding = topRounding,
                     bottomRounding = bottomRounding,
