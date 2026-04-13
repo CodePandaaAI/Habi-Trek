@@ -12,7 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HabitContainer(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun HabiTrekSurface(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
         modifier
             .clip(RoundedCornerShape(24.dp))

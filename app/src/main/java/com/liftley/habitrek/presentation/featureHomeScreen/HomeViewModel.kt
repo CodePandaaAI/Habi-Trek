@@ -21,9 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getHabitsWithTodayStatusUseCase: GetHabitsWithTodayStatusUseCase,
-    private val toggleHabitCompletionUseCase: ToggleHabitCompletionUseCase
-) :
-    ViewModel() {
+    private val toggleHabitCompletionUseCase: ToggleHabitCompletionUseCase) : ViewModel() {
     private val _mutableState = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _mutableState.asStateFlow()
 

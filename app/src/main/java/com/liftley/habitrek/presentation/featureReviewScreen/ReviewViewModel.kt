@@ -158,6 +158,10 @@ class ReviewViewModel @AssistedInject constructor(
         }
     }
 
+    fun currentYearMonthName(): String = "${
+        state.value.currentYearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
+    } ${state.value.currentYearMonth.year}"
+
     // Factory provides hilt the habitId parameter which is a runtime value
     @AssistedFactory
     interface Factory {

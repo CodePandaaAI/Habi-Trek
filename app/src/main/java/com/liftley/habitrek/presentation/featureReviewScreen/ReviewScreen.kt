@@ -50,8 +50,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.R
 import com.liftley.habitrek.core.ui.components.CheckMarkButton
 import com.liftley.habitrek.core.ui.components.ExpressiveIconButton
-import com.liftley.habitrek.core.ui.components.HabitContainer
-import com.liftley.habitrek.core.ui.components.SectionThumbnail
+import com.liftley.habitrek.core.ui.components.HabiTrekSectionThubnail
+import com.liftley.habitrek.core.ui.components.HabiTrekSurface
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.ColorBall
 import com.liftley.habitrek.presentation.featureReviewScreen.components.MetricCard
 import com.liftley.habitrek.presentation.featureReviewScreen.components.SimpleCalendarGrid
@@ -109,8 +109,8 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
     the user to write exactly "delete" word though it can be UPPERCASE or Lower Case as we at the
     end we lower case entire string so it should be just delete with any format.
      */
-    var isDialogVisible by remember { mutableStateOf(false) }
-    var dialogTextFieldText by remember { mutableStateOf("") }
+    var isDeleteHabitDialogVisible by remember { mutableStateOf(false) }
+    var deleteHabitDialogText by remember { mutableStateOf("") }
 
     // Collecting fresh UI state data class
 
@@ -120,19 +120,20 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
 
     val habitName = habit.name
 
-    val habitCompletions = uiState.habitCompletions
+    val habitCompletions = remember(uiState) { uiState.habitCompletions }
 
-    val completionsTotal = uiState.habitCompletions.size // Total streak count
+    val completionsTotal = remember(uiState) { uiState.habitCompletions.size } // Total streak count
 
     val currentYearMonth = uiState.currentYearMonth
 
     val todayDate = uiState.todayDate
 
-    val habitColor = if (habit.color == Color(0L)) MaterialTheme.colorScheme.primary else habit.color
+    val habitColor =
+        if (habit.color == Color(0L)) MaterialTheme.colorScheme.primary else habit.color
 
     val habitPalette = uiState.habitPalette
 
-    val hoursAndMinutes = habit.durationMinutes.toDurationString()
+    val habitDurationInHoursAndMinutes = habit.durationMinutes.toDurationString()
 
     Column(
         modifier = Modifier
@@ -192,7 +193,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
             MetricCard(
                 modifier = Modifier.weight(0.65f),
                 title = "Daily Goal",
-                value = hoursAndMinutes,
+                value = habitDurationInHoursAndMinutes,
                 icon = painterResource(R.drawable.outline_access_time_24),
                 habitColor = habitColor
             )
@@ -209,7 +210,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
         // ----------------------------------------
         // 3. MINIMAL CALENDAR SECTION
         // ----------------------------------------
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 modifier = Modifier
                     .padding(8.dp)
@@ -231,10 +232,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                     // Efficient fade for month name
 
                     Text(
-                        text = "${
-                            currentYearMonth.month.name.lowercase()
-                                .replaceFirstChar { it.uppercase() }
-                        } ${currentYearMonth.year}",
+                        text = reviewViewModel.currentYearMonthName(),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -264,7 +262,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
             }
         }
 
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 Modifier
                     .padding(16.dp)
@@ -275,7 +273,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SectionThumbnail(
+                    HabiTrekSectionThubnail(
                         contentDescription = "Allocated Time",
                         imageVector = painterResource(R.drawable.outline_access_time_24),
                         color = habitColor
@@ -316,7 +314,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                             .background(habitColor.copy(0.1f))
                     ) {
                         Text(
-                            hoursAndMinutes,
+                            habitDurationInHoursAndMinutes,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(8.dp)
@@ -326,7 +324,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
             }
         }
 
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 Modifier
                     .padding(16.dp)
@@ -337,7 +335,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SectionThumbnail(
+                    HabiTrekSectionThubnail(
                         contentDescription = "Color Selector",
                         imageVector = painterResource(R.drawable.baseline_color_theme_24),
                         color = habitColor
@@ -378,7 +376,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
             shape = RoundedCornerShape(48.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             onClick = {
-                isDialogVisible = true
+                isDeleteHabitDialogVisible = true
             }
         ) {
             Text(
@@ -387,8 +385,8 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                 color = MaterialTheme.colorScheme.onError
             )
         }
-        if (isDialogVisible) {
-            BasicAlertDialog(onDismissRequest = { isDialogVisible = false }) {
+        if (isDeleteHabitDialogVisible) {
+            BasicAlertDialog(onDismissRequest = { isDeleteHabitDialogVisible = false }) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -411,16 +409,16 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                         )
 
                         TextField(
-                            value = dialogTextFieldText,
-                            onValueChange = { dialogTextFieldText = it },
+                            value = deleteHabitDialogText,
+                            onValueChange = { deleteHabitDialogText = it },
                             placeholder = { Text("Type  \"delete\" to confirm") }
                         )
                         Button(onClick = {
                             reviewViewModel.deleteHabit()
-                            isDialogVisible = false
+                            isDeleteHabitDialogVisible = false
                             onHabitDeleted()
 
-                        }, enabled = dialogTextFieldText.lowercase() == "delete") {
+                        }, enabled = deleteHabitDialogText.lowercase() == "delete") {
                             Text("Delete Habit")
                         }
                     }

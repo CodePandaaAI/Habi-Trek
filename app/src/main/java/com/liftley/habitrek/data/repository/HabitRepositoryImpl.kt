@@ -3,7 +3,7 @@ package com.liftley.habitrek.data.repository
 import com.liftley.habitrek.data.local.dao.HabitDao
 import com.liftley.habitrek.data.local.entity.toDomain
 import com.liftley.habitrek.data.local.entity.toEntity
-import com.liftley.habitrek.data.local.entity.toFlowHabitList
+import com.liftley.habitrek.data.local.entity.toFlowListHabit
 import com.liftley.habitrek.domain.model.Habit
 import com.liftley.habitrek.domain.repository.HabitRepository
 import jakarta.inject.Inject
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 class HabitRepositoryImpl @Inject constructor(private val habitDao: HabitDao): HabitRepository {
 
     override fun getAllHabits(): Flow<List<Habit>> {
-        return habitDao.getAllHabits().toFlowHabitList()
+        return habitDao.getAllHabits().toFlowListHabit()
     }
 
     override suspend fun upsertHabit(habit: Habit) {

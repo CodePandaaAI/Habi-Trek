@@ -21,9 +21,9 @@ class GetHabitsWithTodayStatusUseCase @Inject constructor(
         return combine(
             flow = habitRepository.getAllHabits(),
             flow2 = completionRepository.getIdOfAllHabitsCompletedForDate(todayDateMillis)
-        ) { habitEntities, habitIds ->
+        ) { habits, habitIds ->
             val completedIdSet = habitIds.toSet()
-            habitEntities.map { habit ->
+            habits.map { habit ->
                 habit.copy(isCompletedToday = habit.id in completedIdSet)
             }
         }

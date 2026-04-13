@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,8 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.R
-import com.liftley.habitrek.core.ui.components.HabitContainer
-import com.liftley.habitrek.core.ui.components.SectionThumbnail
+import com.liftley.habitrek.core.ui.components.HabiTrekSurface
+import com.liftley.habitrek.core.ui.components.HabiTrekSectionThubnail
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.ColorBall
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.HabitCardPreview
 import com.liftley.habitrek.presentation.util.toDurationString
@@ -55,7 +54,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
     val newHabitColor = state.habitUiModel.color
     val newHabitDurationMinutes = state.habitUiModel.durationMinutes
 
-    val hoursAndMinutes = newHabitDurationMinutes.toDurationString()
+    val habitDurationInHoursAndMinutes = newHabitDurationMinutes.toDurationString()
 
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
@@ -66,7 +65,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 modifier = Modifier
                     .padding(16.dp)
@@ -77,7 +76,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SectionThumbnail(
+                    HabiTrekSectionThubnail(
                         contentDescription = "Habit Name",
                         imageVector = painterResource(R.drawable.outline_heart_smile_24),
                         color = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
@@ -108,15 +107,14 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
                     textStyle = MaterialTheme.typography.titleLarge,
                 )
             }
         }
 
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 Modifier
                     .padding(16.dp)
@@ -127,7 +125,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SectionThumbnail(
+                    HabiTrekSectionThubnail(
                         contentDescription = "Allocated Time",
                         imageVector = painterResource(R.drawable.outline_access_time_24),
                         color = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
@@ -145,11 +143,10 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TextField(
+                    OutlinedTextField(
                         value = if (newHabitDurationMinutes == 0) "" else newHabitDurationMinutes.toString(),
                         onValueChange = { newValue ->
-                            val duration = newValue.filter { it.isDigit() }.toIntOrNull() ?: 0
-                            addHabitViewModel.onDurationChange(duration)
+                            addHabitViewModel.onDurationChange(newValue)
                         },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
@@ -171,7 +168,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                             .background(newHabitColor.copy(0.1f))
                     ) {
                         Text(
-                            hoursAndMinutes,
+                            habitDurationInHoursAndMinutes,
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(8.dp)
@@ -181,7 +178,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
             }
         }
 
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 Modifier
                     .padding(16.dp)
@@ -192,7 +189,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    SectionThumbnail(
+                    HabiTrekSectionThubnail(
                         contentDescription = "Color Selector",
                         imageVector = painterResource(R.drawable.baseline_color_theme_24),
                         color = if (state.habitUiModel.color == Color(0L)) MaterialTheme.colorScheme.primary else
@@ -227,7 +224,7 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
             }
         }
 
-        HabitContainer {
+        HabiTrekSurface {
             Column(
                 Modifier
                     .padding(16.dp)
@@ -253,14 +250,13 @@ fun AddHabitScreen(onAddHabitClick: () -> Unit) {
         Spacer(Modifier.weight(1f))
 
         Button(
-            enabled = newHabitName.isBlank().not() && newHabitDurationMinutes > 0,
+            enabled = !newHabitName.isBlank() && newHabitDurationMinutes > 0,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(96.dp),
             shape = RoundedCornerShape(48.dp),
             onClick = {
-                addHabitViewModel.createHabit()
-                onAddHabitClick()
+                addHabitViewModel.createHabit(onAddHabitClick)
             }
         ) {
             Text(

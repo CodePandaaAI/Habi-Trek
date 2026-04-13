@@ -24,7 +24,7 @@ fun HabitEntity.toDomain(): Habit {
     )
 }
 
-fun Flow<List<HabitEntity>>.toFlowHabitList(): Flow<List<Habit>> {
+fun Flow<List<HabitEntity>>.toFlowListHabit(): Flow<List<Habit>> {
     return this.map { list ->
         list.map { entity ->
             Habit(

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.liftley.habitrek.R
 
 @Composable
-fun SectionThumbnail(
+fun HabiTrekSectionThubnail(
     imageVector: Painter,
     contentDescription: String?,
     color: Color = MaterialTheme.colorScheme.primary
@@ -49,8 +49,8 @@ fun SectionThumbnail(
 
 @Preview(showBackground = true)
 @Composable
-fun SectionThumbnailPreview() {
-    SectionThumbnail(
+fun HabiTrekSectionThubnailPreview() {
+    HabiTrekSectionThubnail(
         contentDescription = "Section Thumbnail",
         imageVector = painterResource(R.drawable.outline_heart_smile_24)
     )

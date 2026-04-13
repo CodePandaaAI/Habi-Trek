@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.R
-import com.liftley.habitrek.core.ui.components.HabitContainer
+import com.liftley.habitrek.core.ui.components.HabiTrekSurface
 import com.liftley.habitrek.presentation.featureWebSearch.model.ResultItem
 import com.liftley.habitrek.presentation.featureWebSearch.model.SearchScreenState
 
@@ -72,7 +72,7 @@ fun SearchScreen() {
     ) {
 
         // --- THE SEARCH BAR ---
-        HabitContainer {
+        HabiTrekSurface {
             Row(
                 Modifier.padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically

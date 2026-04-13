@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import com.liftley.habitrek.domain.model.Habit
 
 fun List<Habit>.toHomeUiModelList(): List<HomeUiModel> {
-    return map { habit ->
+    return this.map { habit ->
         HomeUiModel(
             id = habit.id,
             name = habit.name,
