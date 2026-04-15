@@ -9,7 +9,7 @@ fun Habit.toReviewUiModel(): ReviewUiModel {
         id = id,
         name = name,
         color = Color(color.color),
-        isCompletedToday = isCompletedToday,
+        isCompletedToday = false,
         durationMinutes = durationMinutes
     )
 }
@@ -19,7 +19,6 @@ fun ReviewUiModel.toDomain(): Habit {
         id = id,
         name = name,
         color = HabitColor(color.value),
-        isCompletedToday = isCompletedToday,
         durationMinutes = durationMinutes
     )
 }

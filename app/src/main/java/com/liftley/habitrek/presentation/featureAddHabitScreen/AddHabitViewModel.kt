@@ -75,8 +75,7 @@ class AddHabitViewModel @Inject constructor(private val createHabitUseCase: Crea
             id = 0,
             name = habitName,
             color = HabitColor(habitColor),
-            durationMinutes = durationMinutes,
-            isCompletedToday = false
+            durationMinutes = durationMinutes
         )
 
         viewModelScope.launch {

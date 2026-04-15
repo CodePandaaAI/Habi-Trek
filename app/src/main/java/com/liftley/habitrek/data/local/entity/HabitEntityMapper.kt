@@ -19,7 +19,6 @@ fun HabitEntity.toDomain(): Habit {
         id = id,
         name = name,
         color = HabitColor(color.toULong()),
-        isCompletedToday = false,
         durationMinutes = durationMinutes,
     )
 }
@@ -31,7 +30,6 @@ fun Flow<List<HabitEntity>>.toFlowListHabit(): Flow<List<Habit>> {
                 id = entity.id,
                 name = entity.name,
                 color = HabitColor(entity.color.toULong()),
-                isCompletedToday = false,
                 durationMinutes = entity.durationMinutes
             )
         }

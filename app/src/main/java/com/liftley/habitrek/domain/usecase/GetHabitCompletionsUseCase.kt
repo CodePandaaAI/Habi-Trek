@@ -1,6 +1,6 @@
 package com.liftley.habitrek.domain.usecase
 
-import com.liftley.habitrek.domain.model.HabitStatus
+import com.liftley.habitrek.domain.model.HabitWithTodayStatus
 import com.liftley.habitrek.domain.repository.CompletionRepository
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -11,12 +11,12 @@ import java.time.ZoneOffset
 class GetHabitCompletionsUseCase @Inject constructor(private val completionRepository: CompletionRepository) {
     private val todayDateMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
-    operator fun invoke(habitId: Int): Flow<HabitStatus> {
+    operator fun invoke(habitId: Int): Flow<HabitWithTodayStatus> {
         return completionRepository.getAllCompletionsForHabitWithId(habitId).map { completions ->
             val timestamps = completions.map { it.dateMillis }.toSet()
             val today = todayDateMillis
 
-            HabitStatus(
+            HabitWithTodayStatus(
                 completedTimestamps = timestamps,
                 isCompletedToday = timestamps.contains(today)
             )

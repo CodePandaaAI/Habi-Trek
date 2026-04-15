@@ -1,6 +1,6 @@
 package com.liftley.habitrek.domain.usecase
 
-import com.liftley.habitrek.domain.model.Habit
+import com.liftley.habitrek.domain.model.HabitListWithTodayStatusList
 import com.liftley.habitrek.domain.repository.CompletionRepository
 import com.liftley.habitrek.domain.repository.HabitRepository
 import jakarta.inject.Singleton
@@ -17,15 +17,14 @@ class GetHabitsWithTodayStatusUseCase @Inject constructor(
 ) {
     private val todayDateMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
-    operator fun invoke(): Flow<List<Habit>> {
+    operator fun invoke(): Flow<HabitListWithTodayStatusList> {
         return combine(
             flow = habitRepository.getAllHabits(),
             flow2 = completionRepository.getIdOfAllHabitsCompletedForDate(todayDateMillis)
         ) { habits, habitIds ->
             val completedIdSet = habitIds.toSet()
-            habits.map { habit ->
-                habit.copy(isCompletedToday = habit.id in completedIdSet)
-            }
+
+            HabitListWithTodayStatusList(habits = habits, completedIdSet)
         }
     }
 }
