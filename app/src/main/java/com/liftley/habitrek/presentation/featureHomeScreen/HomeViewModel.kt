@@ -21,8 +21,9 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getHabitsWithTodayStatusUseCase: GetHabitsWithTodayStatusUseCase,
-    private val toggleHabitCompletionUseCase: ToggleHabitCompletionUseCase) : ViewModel() {
-    private val _mutableState = MutableStateFlow(HomeUiState())
+    private val toggleHabitCompletionUseCase: ToggleHabitCompletionUseCase
+) : ViewModel() {
+    private val _mutableState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState.Loading)
     val state: StateFlow<HomeUiState> = _mutableState.asStateFlow()
 
     private val todayDateMillis =
@@ -36,9 +37,14 @@ class HomeViewModel @Inject constructor(
 
     private fun observeHabits() {
         viewModelScope.launch {
-            getHabitsWithTodayStatusUseCase().collect { it ->
-                val habits = it.toHomeUiModelList()
-                _mutableState.update { it.copy(habits = habits) }
+            try {
+                getHabitsWithTodayStatusUseCase().collect {
+                    val habits = it.toHomeUiModelList()
+                    _mutableState.value = HomeUiState.Success(habits)
+                }
+            } catch (e: Exception) {
+                _mutableState.value =
+                    HomeUiState.Error(message = e.message ?: "Something Went Wrong")
             }
         }
     }
