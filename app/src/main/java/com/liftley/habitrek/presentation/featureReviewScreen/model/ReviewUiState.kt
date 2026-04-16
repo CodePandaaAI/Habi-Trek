@@ -10,13 +10,7 @@ sealed interface ReviewUiState {
         val habitCompletions: Set<Long> = emptySet(),
 
         // Real Habit Object from Database
-        val reviewUiModel: ReviewUiModel = ReviewUiModel(
-            id = 0,
-            name = "Default",
-            color = Color(0UL),
-            isCompletedToday = false,
-            durationMinutes = 0
-        ),
+        val reviewUiModel: ReviewUiModel,
 
         // Current Year and Month Tracking for Calendar UI
         val currentYearMonth: YearMonth = YearMonth.now(),
