@@ -30,10 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,8 +48,11 @@ import com.liftley.habitrek.core.ui.components.ExpressiveIconButton
 import com.liftley.habitrek.core.ui.components.HabiTrekSectionThumbnail
 import com.liftley.habitrek.core.ui.components.HabiTrekSurface
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.ColorBall
+import com.liftley.habitrek.presentation.featureHomeScreen.components.HabiTrekErrorScreen
+import com.liftley.habitrek.presentation.featureHomeScreen.components.HabiTrekLoadingScreen
 import com.liftley.habitrek.presentation.featureReviewScreen.components.MetricCard
 import com.liftley.habitrek.presentation.featureReviewScreen.components.SimpleCalendarGrid
+import com.liftley.habitrek.presentation.featureReviewScreen.model.ReviewUiState
 import com.liftley.habitrek.presentation.util.toDurationString
 
 
@@ -102,323 +102,328 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
         }
     )
 
-    /*
-    State Variables for Delete Dialog states like isVisible and its textField which requires
-    the user to write exactly "delete" word though it can be UPPERCASE or Lower Case as we at the
-    end we lower case entire string so it should be just delete with any format.
-     */
-    var isDeleteHabitDialogVisible by remember { mutableStateOf(false) }
-    var deleteHabitDialogText by remember { mutableStateOf("") }
-
-    // Collecting fresh UI state data class
-
-    val uiState by reviewViewModel.state.collectAsState()
-
-    val habit = uiState.habitUiModel // Full Habit Object
-
-    val habitName = habit.name
-
-    val isCompletedToday = habit.isCompletedToday
-
-    val habitCompletions = remember(uiState) { uiState.habitCompletions }
-
-    val completionsTotal = remember(uiState) { uiState.habitCompletions.size } // Total streak count
-
-    val currentYearMonth = uiState.currentYearMonth
-
-    val todayDate = reviewViewModel.todayDate
-
-    val defaultColor = Color(0UL)
-
-    val habitColor =
-        if (habit.color == defaultColor) MaterialTheme.colorScheme.primary else habit.color
-
-    val habitDurationInHoursAndMinutes = habit.durationMinutes.toDurationString()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        // ----------------------------------------
-        // 1. HERO HEADER AREA
-        // ----------------------------------------
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                OutlinedTextField(
-                    value = habitName,
-                    onValueChange = { reviewViewModel.updateHabitName(it) },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        disabledBorderColor = Color.Transparent,
-                        errorBorderColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                    ),
-                    textStyle = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    ),
-                )
-            }
-            CheckMarkButton(
-                isHabitCompletedToday = isCompletedToday,
-                buttonSize = 64.dp,
-                iconsSize = 32.dp,
-                habitColor = habitColor
-            ) {
-                reviewViewModel.toggleHabitCompletion(dateMillis = todayDate)
-            }
+    when (val uiState = reviewViewModel.state.collectAsState().value) {
+        ReviewUiState.Loading -> {
+            HabiTrekLoadingScreen()
         }
 
-        // ----------------------------------------
-        // 2. METRICS SHOWCASE ROW
-        // ----------------------------------------
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            MetricCard(
-                modifier = Modifier.weight(0.65f),
-                title = "Daily Goal",
-                value = habitDurationInHoursAndMinutes,
-                icon = painterResource(R.drawable.outline_access_time_24)
-            )
-
-            MetricCard(
-                modifier = Modifier.weight(0.35f),
-                title = "Total Days",
-                value = "$completionsTotal",
-                icon = painterResource(R.drawable.outline_local_fire_department_24)
-            )
+        is ReviewUiState.Error -> {
+            HabiTrekErrorScreen(message = uiState.message)
         }
 
-        // ----------------------------------------
-        // 3. MINIMAL CALENDAR SECTION
-        // ----------------------------------------
-        HabiTrekSurface {
+        is ReviewUiState.Success -> {
+            val habit = uiState.reviewUiModel // Full Habit Object
+
+            val habitName = habit.name
+
+            val isCompletedToday = habit.isCompletedToday
+
+            val habitCompletions = remember(uiState) { uiState.habitCompletions }
+
+            val completionsTotal =
+                remember(uiState) { uiState.habitCompletions.size } // Total streak count
+
+            val currentYearMonth = uiState.currentYearMonth
+
+            val todayDate = reviewViewModel.todayDate
+
+            val defaultColor = Color(0UL)
+
+            val habitColor =
+                if (habit.color == defaultColor) MaterialTheme.colorScheme.primary else habit.color
+
+            val habitDurationInHoursAndMinutes = habit.durationMinutes.toDurationString()
+
+            val isDeleteDialogVisible = uiState.isDeleteHabitDialogVisible
+
+            val deleteHabitDialogText = uiState.deleteHabitDialogText
             Column(
                 modifier = Modifier
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Navigation Header
+
+                // ----------------------------------------
+                // 1. HERO HEADER AREA
+                // ----------------------------------------
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ExpressiveIconButton(
-                        onClick = { reviewViewModel.changeYearMonth(-1) },
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        color = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                        contentDescription = "Previous"
-                    )
-
-                    // Efficient fade for month name
-                    Text(
-                        text = reviewViewModel.currentYearMonthName(),
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    ExpressiveIconButton(
-                        onClick = { reviewViewModel.changeYearMonth(1) },
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        color = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                        contentDescription = "Next"
-                    )
-                }
-
-                SimpleCalendarGrid(
-                    currentMonth = currentYearMonth,
-                    completedDates = habitCompletions,
-                    habitColor = habitColor,
-                    onDayClick = { dateMillis ->
-                        reviewViewModel.toggleHabitCompletion(dateMillis = dateMillis)
+                    Column(modifier = Modifier.weight(1f)) {
+                        OutlinedTextField(
+                            value = habitName,
+                            onValueChange = { reviewViewModel.updateHabitName(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            maxLines = 3,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                disabledBorderColor = Color.Transparent,
+                                errorBorderColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                            ),
+                            textStyle = MaterialTheme.typography.displaySmall.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            ),
+                        )
                     }
-                )
-            }
-        }
+                    CheckMarkButton(
+                        isHabitCompletedToday = isCompletedToday,
+                        buttonSize = 64.dp,
+                        iconsSize = 32.dp,
+                        habitColor = habitColor
+                    ) {
+                        reviewViewModel.toggleHabitCompletion(dateMillis = todayDate)
+                    }
+                }
 
-        HabiTrekSurface {
-            Column(
-                Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+                // ----------------------------------------
+                // 2. METRICS SHOWCASE ROW
+                // ----------------------------------------
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    HabiTrekSectionThumbnail(
-                        contentDescription = "Allocated Time",
-                        imageVector = painterResource(R.drawable.outline_access_time_24),
-                        color = habitColor
+                    MetricCard(
+                        modifier = Modifier.weight(0.65f),
+                        title = "Daily Goal",
+                        value = habitDurationInHoursAndMinutes,
+                        icon = painterResource(R.drawable.outline_access_time_24)
                     )
-                    Text(
-                        "Allocated Time?",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
+
+                    MetricCard(
+                        modifier = Modifier.weight(0.35f),
+                        title = "Total Days",
+                        value = "$completionsTotal",
+                        icon = painterResource(R.drawable.outline_local_fire_department_24)
                     )
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = if (habit.durationMinutes == 0) "" else habit.durationMinutes.toString(),
-                        onValueChange = { newValue ->
-                            reviewViewModel.updateNewHabitDuration(
-                                newValue
-                            )
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-                        placeholder = { Text("time in mins") },
-                        maxLines = 1,
-                        shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier.weight(1f)
-                    )
-                    Box(
-                        contentAlignment = Alignment.Center,
+
+                // ----------------------------------------
+                // 3. MINIMAL CALENDAR SECTION
+                // ----------------------------------------
+                HabiTrekSurface {
+                    Column(
                         modifier = Modifier
-                            .height(56.dp)
-                            .weight(1f)
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text(
-                            habitDurationInHoursAndMinutes,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(8.dp)
+                        // Navigation Header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ExpressiveIconButton(
+                                onClick = { reviewViewModel.changeYearMonth(-1) },
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                color = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                                contentDescription = "Previous"
+                            )
+
+                            // Efficient fade for month name
+                            Text(
+                                text = reviewViewModel.currentYearMonthName(),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            ExpressiveIconButton(
+                                onClick = { reviewViewModel.changeYearMonth(1) },
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                color = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                                contentDescription = "Next"
+                            )
+                        }
+
+                        SimpleCalendarGrid(
+                            currentMonth = currentYearMonth,
+                            completedDates = habitCompletions,
+                            habitColor = habitColor,
+                            onDayClick = { dateMillis ->
+                                reviewViewModel.toggleHabitCompletion(dateMillis = dateMillis)
+                            }
                         )
                     }
                 }
-            }
-        }
 
-        HabiTrekSurface {
-            Column(
-                Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    HabiTrekSectionThumbnail(
-                        contentDescription = "Color Selector",
-                        imageVector = painterResource(R.drawable.baseline_color_theme_24),
-                        color = habitColor
-                    )
-                    Text(
-                        "Choose a color",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
+                HabiTrekSurface {
+                    Column(
+                        Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            HabiTrekSectionThumbnail(
+                                contentDescription = "Allocated Time",
+                                imageVector = painterResource(R.drawable.outline_access_time_24),
+                                color = habitColor
+                            )
+                            Text(
+                                "Allocated Time?",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = if (habit.durationMinutes == 0) "" else habit.durationMinutes.toString(),
+                                onValueChange = { newValue ->
+                                    reviewViewModel.updateNewHabitDuration(
+                                        newValue
+                                    )
+                                },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
+                                placeholder = { Text("time in mins") },
+                                maxLines = 1,
+                                shape = RoundedCornerShape(24.dp),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .height(56.dp)
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                            ) {
+                                Text(
+                                    habitDurationInHoursAndMinutes,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                    }
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    ReviewViewModel.habitPalette.forEachIndexed { index, colorULong ->
-                        ColorBall(colorULong, habit.color == Color(colorULong)) {
-                            reviewViewModel.updateHabitColor(index)
+
+                HabiTrekSurface {
+                    Column(
+                        Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            HabiTrekSectionThumbnail(
+                                contentDescription = "Color Selector",
+                                imageVector = painterResource(R.drawable.baseline_color_theme_24),
+                                color = habitColor
+                            )
+                            Text(
+                                "Choose a color",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            ReviewViewModel.habitPalette.forEachIndexed { index, colorULong ->
+                                ColorBall(colorULong, habit.color == Color(colorULong)) {
+                                    reviewViewModel.updateHabitColor(index)
+                                }
+                            }
+                        }
+
+                        Button(
+                            onClick = { reviewViewModel.updateHabitColor(0) },
+                            Modifier.fillMaxWidth()
+                        ) {
+                            Text("Use System Default Color Scheme")
                         }
                     }
                 }
 
                 Button(
-                    onClick = { reviewViewModel.updateHabitColor(0) },
-                    Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(96.dp),
+                    shape = RoundedCornerShape(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    onClick = {
+                        reviewViewModel.toggleDeleteDialog(true)
+                    }
                 ) {
-                    Text("Use System Default Color Scheme")
+                    Text(
+                        "Delete Habit",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onError
+                    )
                 }
             }
-        }
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(96.dp),
-            shape = RoundedCornerShape(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            onClick = {
-                isDeleteHabitDialogVisible = true
-            }
-        ) {
-            Text(
-                "Delete Habit",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onError
-            )
-        }
-        if (isDeleteHabitDialogVisible) {
-            BasicAlertDialog(onDismissRequest = { isDeleteHabitDialogVisible = false }) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+            if (isDeleteDialogVisible) {
+                BasicAlertDialog(onDismissRequest = { reviewViewModel.toggleDeleteDialog(false) }) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MaterialTheme.colorScheme.surface)
                     ) {
-                        Text(
-                            "Delete Habit",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            "Are you sure you want to delete this habit?",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
-
-                        TextField(
-                            value = deleteHabitDialogText,
-                            onValueChange = { deleteHabitDialogText = it },
-                            placeholder = { Text("Type  \"delete\" to confirm") }
-                        )
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                reviewViewModel.deleteHabit()
-                                isDeleteHabitDialogVisible = false
-                                onHabitDeleted()
-                            },
-                            enabled = deleteHabitDialogText.lowercase() == "delete"
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text("Delete Habit")
+                            Text(
+                                "Delete Habit",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                "Are you sure you want to delete this habit?",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+
+                            TextField(
+                                value = deleteHabitDialogText,
+                                onValueChange = { reviewViewModel.updateDeleteDialogText(it) },
+                                placeholder = { Text("Type  \"delete\" to confirm") }
+                            )
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    reviewViewModel.deleteHabit()
+                                    reviewViewModel.toggleDeleteDialog(false)
+                                    onHabitDeleted()
+                                },
+                                enabled = deleteHabitDialogText.lowercase() == "delete"
+                            ) {
+                                Text("Delete Habit")
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 }

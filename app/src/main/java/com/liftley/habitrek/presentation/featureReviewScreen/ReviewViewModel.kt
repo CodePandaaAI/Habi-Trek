@@ -53,7 +53,8 @@ class ReviewViewModel @AssistedInject constructor(
         )
     }
 
-    private val _mutableState = MutableStateFlow(ReviewUiState())
+    private val _mutableState: MutableStateFlow<ReviewUiState> =
+        MutableStateFlow(ReviewUiState.Loading)
     val state: StateFlow<ReviewUiState> = _mutableState.asStateFlow()
 
     private var nameUpdateJob: Job? = null
@@ -70,11 +71,12 @@ class ReviewViewModel @AssistedInject constructor(
     // Initial Data Loading
     init {
         viewModelScope.launch {
-            val habit = habitRepository.getHabitWithId(habitId)
-            _mutableState.update { currentState ->
-                currentState.copy(
-                    habitUiModel = habit.toReviewUiModel()
-                )
+            try {
+                val habit = habitRepository.getHabitWithId(habitId)
+                _mutableState.value = ReviewUiState.Success(reviewUiModel = habit.toReviewUiModel())
+            } catch (e: Exception) {
+                _mutableState.value =
+                    ReviewUiState.Error(message = e.message ?: "Something Went Wrong")
             }
         }
         startObservingHabitCompletions()
@@ -84,12 +86,16 @@ class ReviewViewModel @AssistedInject constructor(
         viewModelScope.launch {
             getHabitCompletionsUseCase(habitId).collect { habitStatus ->
                 _mutableState.update { currentState ->
-                    currentState.copy(
-                        habitCompletions = habitStatus.completedTimestamps,
-                        habitUiModel = currentState.habitUiModel.copy(
-                            isCompletedToday = habitStatus.isCompletedToday
+                    if (currentState is ReviewUiState.Success) {
+                        currentState.copy(
+                            habitCompletions = habitStatus.completedTimestamps,
+                            reviewUiModel = currentState.reviewUiModel.copy(
+                                isCompletedToday = habitStatus.isCompletedToday
+                            )
                         )
-                    )
+                    } else {
+                        currentState
+                    }
                 }
             }
         }
@@ -98,29 +104,31 @@ class ReviewViewModel @AssistedInject constructor(
 
     fun changeYearMonth(monthsToAdd: Long) {
         _mutableState.update { currentState ->
-            // plusMonths returns a NEW instance that we now save to Trigger UI modification
-            currentState.copy(
-                currentYearMonth = currentState.currentYearMonth.plusMonths(monthsToAdd)
-            )
+            if (currentState is ReviewUiState.Success) {
+                // plusMonths returns a NEW instance that we now save to Trigger UI modification
+                currentState.copy(
+                    currentYearMonth = currentState.currentYearMonth.plusMonths(monthsToAdd)
+                )
+            } else currentState
         }
     }
 
     // Updating Habit Data
-
     fun updateHabitName(name: String) {
         _mutableState.update { currentState ->
-            currentState.copy(
-                habitUiModel = currentState.habitUiModel.copy(name = name)
-            )
+            if (currentState is ReviewUiState.Success) {
+                currentState.copy(reviewUiModel = currentState.reviewUiModel.copy(name = name))
+            } else currentState
         }
 
-        // Cancel the previous job before starting a new one
-        nameUpdateJob?.cancel()
-        nameUpdateJob = viewModelScope.launch {
-            delay(700) // Debounce for 700ms
-            habitRepository.upsertHabit(
-                state.value.habitUiModel.toDomain()
-            )
+        val currentState = state.value
+        if (currentState is ReviewUiState.Success) {
+            val domainHabit = currentState.reviewUiModel.toDomain()
+            nameUpdateJob?.cancel()
+            nameUpdateJob = viewModelScope.launch {
+                delay(700)
+                habitRepository.upsertHabit(domainHabit)
+            }
         }
     }
 
@@ -129,36 +137,42 @@ class ReviewViewModel @AssistedInject constructor(
         val durationMinutes = if (value !in 0..1440) 0 else value
 
         _mutableState.update { currentState ->
-            currentState.copy(
-                habitUiModel = currentState.habitUiModel.copy(durationMinutes = durationMinutes)
-            )
+            if (currentState is ReviewUiState.Success) {
+                currentState.copy(reviewUiModel = currentState.reviewUiModel.copy(durationMinutes = durationMinutes))
+            } else currentState
         }
 
         if (durationMinutes == 0) return
-        dateUpdateJob?.cancel()
-        dateUpdateJob = viewModelScope.launch {
-            delay(700)
-            habitRepository.upsertHabit(
-                state.value.habitUiModel.toDomain()
-            )
+        val currentState = state.value
+        if (currentState is ReviewUiState.Success) {
+            val domainHabit = currentState.reviewUiModel.toDomain()
+            dateUpdateJob?.cancel()
+            dateUpdateJob = viewModelScope.launch {
+                delay(700)
+                habitRepository.upsertHabit(domainHabit)
+            }
         }
     }
 
+
     fun updateHabitColor(index: Int) {
         _mutableState.update { currentState ->
-            val color = habitPalette[index]
-            currentState.copy(
-                habitUiModel = currentState.habitUiModel.copy(color = Color(color))
-            )
+            if (currentState is ReviewUiState.Success) {
+                currentState.copy(reviewUiModel = currentState.reviewUiModel.copy(color = Color(habitPalette[index])))
+            } else currentState
         }
-        colorUpdateJob?.cancel()
-        colorUpdateJob = viewModelScope.launch {
-            delay(700)
-            habitRepository.upsertHabit(
-                state.value.habitUiModel.toDomain()
-            )
+
+        val currentState = state.value
+        if (currentState is ReviewUiState.Success) {
+            val domainHabit = currentState.reviewUiModel.toDomain()
+            colorUpdateJob?.cancel()
+            colorUpdateJob = viewModelScope.launch {
+                delay(700)
+                habitRepository.upsertHabit(domainHabit)
+            }
         }
     }
+
 
     // Adding or Removing Completions(Marking completed days and removing not completed ones)
     fun toggleHabitCompletion(dateMillis: Long) {
@@ -171,15 +185,36 @@ class ReviewViewModel @AssistedInject constructor(
 
     // Delete Habit Entity with All Completions Permanently
     fun deleteHabit() {
-        viewModelScope.launch {
-            val habitId = state.value.habitUiModel.id
-            habitRepository.deleteHabit(habitId)
+        if (state.value is ReviewUiState.Success) {
+            viewModelScope.launch {
+                val habitId = (state.value as ReviewUiState.Success).reviewUiModel.id
+                habitRepository.deleteHabit(habitId)
+            }
         }
     }
 
-    fun currentYearMonthName(): String = "${
-        state.value.currentYearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    } ${state.value.currentYearMonth.year}"
+    fun toggleDeleteDialog(toggleValue: Boolean) {
+        _mutableState.update { currentState ->
+            if (currentState is ReviewUiState.Success) {
+                currentState.copy(isDeleteHabitDialogVisible = toggleValue)
+            } else currentState
+        }
+    }
+
+    fun updateDeleteDialogText(newText: String) {
+        _mutableState.update { currentState ->
+            if (currentState is ReviewUiState.Success) {
+                currentState.copy(deleteHabitDialogText = newText)
+            } else currentState
+        }
+    }
+
+    fun currentYearMonthName(): String {
+        val success = state.value as? ReviewUiState.Success ?: return ""
+        val ym = success.currentYearMonth
+        return "${ym.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${ym.year}"
+    }
+
 
     @AssistedFactory
     interface Factory {

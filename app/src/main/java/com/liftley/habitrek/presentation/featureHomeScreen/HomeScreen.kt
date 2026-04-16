@@ -29,6 +29,10 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
             HabiTrekLoadingScreen()
         }
 
+        is HomeUiState.Error -> {
+            HabiTrekErrorScreen(message = uiState.message)
+        }
+
         is HomeUiState.Success -> {
             LazyColumn(
                 Modifier.fillMaxSize(),
@@ -64,10 +68,6 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                 }
 
             }
-        }
-
-        is HomeUiState.Error -> {
-            HabiTrekErrorScreen(message = uiState.message)
         }
     }
 }
