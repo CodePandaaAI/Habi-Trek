@@ -137,6 +137,7 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
             val isDeleteDialogVisible = uiState.isDeleteHabitDialogVisible
 
             val deleteHabitDialogText = uiState.deleteHabitDialogText
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -424,6 +425,5 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                 }
             }
         }
-
     }
 }

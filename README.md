@@ -58,91 +58,91 @@ The Presentation layer depends on Domain. The Data layer depends on Domain. The 
 ### Layer Breakdown
 
 #### Data Layer (`data/`)
-| Component | Purpose |
-|---|---|
-| `HabitDao` | Room DAO for habit CRUD operations |
-| `CompletionDao` | Room DAO for completion records (marking days) |
-| `HabitEntity` | Room entity for the `habit_table` |
-| `CompletionEntity` | Room entity for the `completions` table with ForeignKey cascade |
-| `HabitEntityMapper` | Extension functions: `Habit.toEntity()`, `HabitEntity.toDomain()`, `Flow<List<HabitEntity>>.toFlowListHabit()` |
-| `CompletionEntityMapper` | Extension functions: `Completion.toEntity()`, `Flow<List<CompletionEntity>>.toFlowCompletionList()` |
-| `HabitRepositoryImpl` | Implements domain `HabitRepository` interface, handles entity ↔ domain mapping |
-| `CompletionRepositoryImpl` | Implements domain `CompletionRepository` interface |
-| `SearchRepositoryImpl` | Implements domain `SearchRepository`, calls GNews API via Retrofit |
-| `HabitTrackerAppDatabase` | Room database exposing `habitDao()` and `completionDao()` |
-| `SearchApi` | Retrofit interface for GNews API |
+| Component                  | Purpose                                                                                                        |
+|----------------------------|----------------------------------------------------------------------------------------------------------------|
+| `HabitDao`                 | Room DAO for habit CRUD operations                                                                             |
+| `CompletionDao`            | Room DAO for completion records (marking days)                                                                 |
+| `HabitEntity`              | Room entity for the `habit_table`                                                                              |
+| `CompletionEntity`         | Room entity for the `completions` table with ForeignKey cascade                                                |
+| `HabitEntityMapper`        | Extension functions: `Habit.toEntity()`, `HabitEntity.toDomain()`, `Flow<List<HabitEntity>>.toFlowListHabit()` |
+| `CompletionEntityMapper`   | Extension functions: `Completion.toEntity()`, `Flow<List<CompletionEntity>>.toFlowCompletionList()`            |
+| `HabitRepositoryImpl`      | Implements domain `HabitRepository` interface, handles entity ↔ domain mapping                                 |
+| `CompletionRepositoryImpl` | Implements domain `CompletionRepository` interface                                                             |
+| `SearchRepositoryImpl`     | Implements domain `SearchRepository`, calls GNews API via Retrofit                                             |
+| `HabitTrackerAppDatabase`  | Room database exposing `habitDao()` and `completionDao()`                                                      |
+| `SearchApi`                | Retrofit interface for GNews API                                                                               |
 
 #### Domain Layer (`domain/`)
-| Component | Purpose |
-|---|---|
-| `Habit` | Core domain model — `id`, `name`, `color` (as `HabitColor`), `durationMinutes` |
-| `HabitColor` | Value wrapper for color as `ULong` |
-| `Completion` | Domain model — `id`, `habitId`, `dateMillis` |
-| `HabitListWithTodayStatusList` | Bundles a list of habits with a set of completed habit IDs for today |
-| `HabitWithTodayStatus` | Bundles completion timestamps with an `isCompletedToday` boolean |
-| `HabitRepository` | Interface for habit CRUD |
-| `CompletionRepository` | Interface for completion CRUD and queries |
-| `SearchRepository` | Interface for web search |
+| Component                         | Purpose                                                                             |
+|-----------------------------------|-------------------------------------------------------------------------------------|
+| `Habit`                           | Core domain model — `id`, `name`, `color` (as `HabitColor`), `durationMinutes`      |
+| `HabitColor`                      | Value wrapper for color as `ULong`                                                  |
+| `Completion`                      | Domain model — `id`, `habitId`, `dateMillis`                                        |
+| `HabitListWithTodayStatusList`    | Bundles a list of habits with a set of completed habit IDs for today                |
+| `HabitWithTodayStatus`            | Bundles completion timestamps with an `isCompletedToday` boolean                    |
+| `HabitRepository`                 | Interface for habit CRUD                                                            |
+| `CompletionRepository`            | Interface for completion CRUD and queries                                           |
+| `SearchRepository`                | Interface for web search, returns `List<SearchArticle>`                             |
 | `GetHabitsWithTodayStatusUseCase` | Combines habits flow + today's completions flow into `HabitListWithTodayStatusList` |
-| `GetHabitCompletionsUseCase` | Maps all completions for a habit into `HabitWithTodayStatus` |
-| `ToggleHabitCompletionUseCase` | Checks if completion exists → deletes or creates accordingly |
-| `CreateHabitUseCase` | Delegates habit creation to repository |
+| `GetHabitCompletionsUseCase`      | Maps all completions for a habit into `HabitWithTodayStatus`                        |
+| `ToggleHabitCompletionUseCase`    | Checks if completion exists → deletes or creates accordingly                        |
+| `CreateHabitUseCase`              | Delegates habit creation to repository                                              |
 
 #### Presentation Layer (`presentation/`)
 Each feature has its own package with `Screen`, `ViewModel`, `model/` (containing `UiState`, `UiModel`, `Mapper`).
 
-| Feature | Key Components |
-|---|---|
-| `featureHomeScreen` | `HomScreen`, `HomeViewModel`, `HomeUiState` (sealed), `HomeUiModel`, `HomeUiModelMapper`, `HabitCard`, `HabiTrekEmptyScreen` |
-| `featureAddHabitScreen` | `AddHabitScreen`, `AddHabitViewModel`, `AddHabitUiState`, `AddHabitUiModel`, `HabitCardPreview`, `ColorBall` |
-| `featureReviewScreen` | `ReviewScreen`, `ReviewViewModel` (AssistedInject), `ReviewUiState`, `ReviewUiModel`, `ReviewUiModelMapper`, `SimpleCalendarGrid`, `MetricCard` |
-| `featureWebSearch` | `SearchScreen`, `SearchViewModel`, `SearchScreenState` (sealed), `SearchResult`, `ResultItem`, `SearchResultItem` |
-| `navigation` | `HabiTrekNavHost` — Navigation 3 host with `NavDisplay` |
+| Feature                 | Key Components                                                                                                                                           |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `featureHomeScreen`     | `HomScreen`, `HomeViewModel`, `HomeUiState` (sealed), `HomeUiModel`, `HomeUiModelMapper`, `HabitCard`                                                    |
+| `featureAddHabitScreen` | `AddHabitScreen`, `AddHabitViewModel`, `AddHabitUiState`, `AddHabitUiModel`, `HabitCardPreview`, `ColorBall`                                             |
+| `featureReviewScreen`   | `ReviewScreen`, `ReviewViewModel` (AssistedInject), `ReviewUiState` (sealed), `ReviewUiModel`, `ReviewUiModelMapper`, `SimpleCalendarGrid`, `MetricCard` |
+| `featureWebSearch`      | `SearchScreen`, `SearchViewModel`, `SearchScreenState` (sealed), `SearchArticle` (domain), `SearchResultItem`                                            |
+| `navigation`            | `HabiTrekNavHost` — Navigation 3 host with `NavDisplay`                                                                                                  |
 
 #### Core Layer (`core/`)
-| Component | Purpose |
-|---|---|
-| `di/AppModule` | Hilt module providing Room database, DAOs, Retrofit, and SearchApi |
-| `di/RepositoryModule` | Hilt `@Binds` module mapping interfaces to implementations |
-| `ui/components/` | Shared composables: `CheckMarkButton`, `HabiTrekSurface`, `HabiTrekSectionThumbnail`, `ExpressiveIconButton`, `HabiTrekNavigationBar`, `HabiTrekFloatingActionButton`, `HabiTrekAppTopBar` |
-| `ui/navigation/` | `NavRoutes` (sealed interface), `NavigationViewModel` |
-| `theme/` | Material 3 theme: `Color.kt`, `Type.kt`, `Shapes.kt`, `Theme.kt` |
+| Component             | Purpose                                                                                                                                                                                    |
+|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `di/AppModule`        | Hilt module providing Room database, DAOs, Retrofit, and SearchApi                                                                                                                         |
+| `di/RepositoryModule` | Hilt `@Binds` module mapping interfaces to implementations                                                                                                                                 |
+| `ui/components/`      | Shared composables: `CheckMarkButton`, `HabiTrekSurface`, `HabiTrekSectionThumbnail`, `ExpressiveIconButton`, `HabiTrekNavigationBar`, `HabiTrekFloatingActionButton`, `HabiTrekAppTopBar` |
+| `ui/navigation/`      | `NavRoutes` (sealed interface), `NavigationViewModel`                                                                                                                                      |
+| `theme/`              | Material 3 theme: `Color.kt`, `Type.kt`, `Shapes.kt`, `Theme.kt`                                                                                                                           |
 
 ---
 
 ## Tech Stack
 
-| Category | Technology |
-|---|---|
-| **Language** | Kotlin |
-| **UI Framework** | Jetpack Compose (Material 3) |
-| **Architecture** | Clean Architecture + MVVM + UDF (Unidirectional Data Flow) |
-| **DI** | Hilt (Dagger) |
-| **Database** | Room (SQLite) |
-| **Networking** | Retrofit + Gson |
-| **Navigation** | Jetpack Navigation 3 |
-| **Async** | Kotlin Coroutines + Flow |
-| **State Management** | StateFlow + MutableStateFlow |
-| **Animations** | Animatable, animateColorAsState, animateFloatAsState, graphicsLayer |
+| Category             | Technology                                                          |
+|----------------------|---------------------------------------------------------------------|
+| **Language**         | Kotlin                                                              |
+| **UI Framework**     | Jetpack Compose (Material 3)                                        |
+| **Architecture**     | Clean Architecture + MVVM + UDF (Unidirectional Data Flow)          |
+| **DI**               | Hilt (Dagger)                                                       |
+| **Database**         | Room (SQLite)                                                       |
+| **Networking**       | Retrofit + Gson                                                     |
+| **Navigation**       | Jetpack Navigation 3                                                |
+| **Async**            | Kotlin Coroutines + Flow                                            |
+| **State Management** | StateFlow + MutableStateFlow                                        |
+| **Animations**       | Animatable, animateColorAsState, animateFloatAsState, graphicsLayer |
 
 ---
 
 ## Database Schema
 
 ### `habit_table`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `Int` | Primary key, auto-generated |
-| `name` | `String` | Habit name |
-| `color` | `Long` | Compose Color value stored as Long |
-| `duration_minutes` | `Int` | Daily time allocation in minutes |
+| Column             | Type     | Notes                              |
+|--------------------|----------|------------------------------------|
+| `id`               | `Int`    | Primary key, auto-generated        |
+| `name`             | `String` | Habit name                         |
+| `color`            | `Long`   | Compose Color value stored as Long |
+| `duration_minutes` | `Int`    | Daily time allocation in minutes   |
 
 ### `completions`
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `Int` | Primary key, auto-generated |
-| `habitId` | `Int` | Foreign key → `habit_table.id` (CASCADE on delete) |
-| `dateMillis` | `Long` | UTC midnight timestamp of the completed day |
+| Column       | Type   | Notes                                              |
+|--------------|--------|----------------------------------------------------|
+| `id`         | `Int`  | Primary key, auto-generated                        |
+| `habitId`    | `Int`  | Foreign key → `habit_table.id` (CASCADE on delete) |
+| `dateMillis` | `Long` | UTC midnight timestamp of the completed day        |
 
 ---
 
@@ -202,7 +202,7 @@ com.liftley.habitrek/
 │   │   └── dto/                     # (placeholder for future DTOs)
 │   └── repository/                  # Repository implementations
 ├── domain/
-│   ├── model/                       # Habit, Completion, HabitColor, etc.
+│   ├── model/                       # Habit, Completion, HabitColor, SearchArticle, etc.
 │   ├── repository/                  # Repository interfaces
 │   └── usecase/                     # Business logic use cases
 └── presentation/
@@ -210,14 +210,14 @@ com.liftley.habitrek/
     │   ├── components/              # ColorBall, HabitCardPreview
     │   └── model/                   # AddHabitUiState, AddHabitUiModel
     ├── featureHomeScreen/
-    │   ├── components/              # HabitCard, HabiTrekEmptyScreen
+    │   ├── components/              # HabitCard
     │   └── model/                   # HomeUiState, HomeUiModel, Mapper
     ├── featureReviewScreen/
     │   ├── components/              # SimpleCalendarGrid, MetricCard
     │   └── model/                   # ReviewUiState, ReviewUiModel, Mapper
     ├── featureWebSearch/
     │   ├── components/              # SearchResultItem
-    │   └── model/                   # SearchScreenState, SearchResult
+    │   └── model/                   # SearchScreenState
     ├── navigation/                  # HabiTrekNavHost
     └── util/                        # TimeUtils
 ```
