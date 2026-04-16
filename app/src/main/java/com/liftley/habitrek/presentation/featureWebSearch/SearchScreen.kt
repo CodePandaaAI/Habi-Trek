@@ -134,7 +134,7 @@ fun SearchScreen() {
             }
 
             is SearchScreenState.Success -> {
-                if (result.searchResult.isEmpty()) {
+                if (result.articles.isEmpty()) {
                     Box(
                         Modifier
                             .clip(RoundedCornerShape(24.dp))
@@ -151,39 +151,25 @@ fun SearchScreen() {
                                 "Decorative",
                                 Modifier.size(48.dp)
                             )
-
-                            Text(
-                                "No Results Found!",
-                                style = MaterialTheme.typography.titleLarge
-                            )
+                            Text("No Results Found!", style = MaterialTheme.typography.titleLarge)
                         }
                     }
-
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        itemsIndexed(result.searchResult) { index, item ->
+                        itemsIndexed(result.articles) { index, item ->
                             val topBottomDp: Pair<Dp, Dp> = when {
-                                index == 0 -> {
-                                    if (result.searchResult.size > 1) {
-                                        Pair(24.dp, 8.dp)
-                                    } else {
-                                        Pair(24.dp, 24.dp)
-                                    }
-                                }
+                                index == 0 -> if (result.articles.size > 1) Pair(
+                                    24.dp,
+                                    8.dp
+                                ) else Pair(24.dp, 24.dp)
 
-                                index < result.searchResult.size - 1 -> {
-                                    Pair(8.dp, 8.dp)
-                                }
-
-                                else -> {
-                                    Pair(8.dp, 24.dp)
-                                }
+                                index < result.articles.size - 1 -> Pair(8.dp, 8.dp)
+                                else -> Pair(8.dp, 24.dp)
                             }
-
                             SearchResultItem(
                                 item,
                                 top = topBottomDp.first,
@@ -195,20 +181,18 @@ fun SearchScreen() {
             }
 
             is SearchScreenState.Error -> {
-                result.error?.let {
-                    Box(
-                        Modifier
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                Box(
+                    Modifier
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = result.message,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }

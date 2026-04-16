@@ -1,7 +1,7 @@
 package com.liftley.habitrek.domain.repository
 
-import com.liftley.habitrek.presentation.featureWebSearch.model.SearchResult
+import com.liftley.habitrek.domain.model.SearchArticle
 
 interface SearchRepository {
-    suspend fun search(query: String): SearchResult
+    suspend fun search(query: String): List<SearchArticle>
 }

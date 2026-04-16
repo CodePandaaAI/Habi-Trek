@@ -47,7 +47,7 @@ class HomeViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _mutableState.value =
-                    HomeUiState.Error(message = e.message ?: "Something Went Wrong")
+                    HomeUiState.Error(message = "Something Went Wrong")
             }
         }
     }

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.liftley.habitrek.domain.repository.SearchRepository
 import com.liftley.habitrek.presentation.featureWebSearch.model.SearchScreenState
-import com.liftley.habitrek.presentation.featureWebSearch.model.toSearchScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +23,6 @@ class SearchViewModel @Inject constructor(
     private val _queryFlow = MutableStateFlow("")
     val query = _queryFlow.asStateFlow()
 
-
     fun onQueryChange(newQuery: String) {
         _queryFlow.value = newQuery
     }
@@ -35,7 +33,19 @@ class SearchViewModel @Inject constructor(
         _mutableState.value = SearchScreenState.Loading
 
         viewModelScope.launch {
-            _mutableState.value = repository.search(query.value).toSearchScreenState()
+            try {
+                val articles = repository.search(query.value)
+                _mutableState.value = SearchScreenState.Success(articles)
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                _mutableState.value = SearchScreenState.Error(
+                    message = when {
+                        e.message?.contains("Unable to resolve host") == true -> "No internet connection."
+                        e.message?.contains("timeout") == true -> "Request timed out."
+                        else -> "Search failed. Try again."
+                    }
+                )
+            }
         }
     }
 }

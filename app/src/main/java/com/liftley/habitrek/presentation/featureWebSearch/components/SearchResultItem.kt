@@ -20,13 +20,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.liftley.habitrek.presentation.featureWebSearch.model.ResultItem
+import com.liftley.habitrek.domain.model.SearchArticle
 
 @Composable
-fun SearchResultItem(item: ResultItem, top: Dp, bottom: Dp) {
-    // Mutable State "var isPressed" for checking if ResultItem is clicked or not for running shrink/expand animation
+fun SearchResultItem(item: SearchArticle, top: Dp, bottom: Dp) {
     var isPressed by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
 
     SearchResultContainer(isPressed = { isPressed }, top = top, bottom = bottom) {
@@ -37,23 +35,13 @@ fun SearchResultItem(item: ResultItem, top: Dp, bottom: Dp) {
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onPress = {
-                            // 1. FINGER DOWN: Trigger the shrink animation immediately
                             isPressed = true
-
-                            // 2. WAIT: Pause execution and see how the tap resolves
                             tryAwaitRelease()
-
-                            // 3. FINGER UP OR CANCELED: Trigger the release animation
-                            // Notice this happens whether the tap succeeded or was stolen! Let it bounce back!
                             isPressed = false
                         },
                         onTap = {
-                            // Opens the link in your phone's browser!
-                            if (item.link.isNotBlank() && item.link != "No Link") {
-                                val intent = Intent(
-                                    Intent.ACTION_VIEW,
-                                    item.link.toUri()
-                                )
+                            if (item.url.isNotBlank()) {
+                                val intent = Intent(Intent.ACTION_VIEW, item.url.toUri())
                                 context.startActivity(intent)
                             }
                         }
@@ -67,7 +55,7 @@ fun SearchResultItem(item: ResultItem, top: Dp, bottom: Dp) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = item.snippet,
+                text = item.description,
                 style = MaterialTheme.typography.bodyMedium
             )
         }

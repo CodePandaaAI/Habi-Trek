@@ -77,8 +77,7 @@ class ReviewViewModel @AssistedInject constructor(
                         ReviewUiState.Success(reviewUiModel = habit.toReviewUiModel())
                 }
             } catch (e: Exception) {
-                _mutableState.value =
-                    ReviewUiState.Error(message = "Habit No Longer Exists")
+                _mutableState.value = ReviewUiState.Error(message = "Habit No Longer Exists")
             }
         }
         startObservingHabitCompletions()
