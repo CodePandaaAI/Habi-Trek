@@ -119,7 +119,6 @@ fun SearchScreen() {
                 ) {
                     Text("Search for anything! 😇", style = MaterialTheme.typography.titleLarge)
                 }
-
             }
 
             is SearchScreenState.Loading -> {

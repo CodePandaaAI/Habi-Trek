@@ -36,5 +36,5 @@ interface HabitDao {
     - Used when opening Review / Detail Screen of a Habit
      */
     @Query("SELECT * FROM habit_table WHERE id = :id")
-    suspend fun getHabitWithId(id: Int): HabitEntity
+    fun getHabitWithId(id: Int): Flow<HabitEntity>
 }

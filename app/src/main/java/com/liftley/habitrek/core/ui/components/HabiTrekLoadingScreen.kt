@@ -1,4 +1,4 @@
-package com.liftley.habitrek.presentation.featureHomeScreen.components
+package com.liftley.habitrek.core.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

@@ -72,11 +72,13 @@ class ReviewViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             try {
-                val habit = habitRepository.getHabitWithId(habitId)
-                _mutableState.value = ReviewUiState.Success(reviewUiModel = habit.toReviewUiModel())
+                habitRepository.getHabitWithId(habitId).collect { habit ->
+                    _mutableState.value =
+                        ReviewUiState.Success(reviewUiModel = habit.toReviewUiModel())
+                }
             } catch (e: Exception) {
                 _mutableState.value =
-                    ReviewUiState.Error(message = e.message ?: "Something Went Wrong")
+                    ReviewUiState.Error(message = "Habit No Longer Exists")
             }
         }
         startObservingHabitCompletions()
@@ -158,7 +160,13 @@ class ReviewViewModel @AssistedInject constructor(
     fun updateHabitColor(index: Int) {
         _mutableState.update { currentState ->
             if (currentState is ReviewUiState.Success) {
-                currentState.copy(reviewUiModel = currentState.reviewUiModel.copy(color = Color(habitPalette[index])))
+                currentState.copy(
+                    reviewUiModel = currentState.reviewUiModel.copy(
+                        color = Color(
+                            habitPalette[index]
+                        )
+                    )
+                )
             } else currentState
         }
 

@@ -38,8 +38,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 getHabitsWithTodayStatusUseCase().collect {
-                    val habits = it.toHomeUiModelList()
-                    _mutableState.value = HomeUiState.Success(habits)
+                    if (it.habits.isEmpty() && it.completedIdSet.isEmpty()) {
+                        _mutableState.value = HomeUiState.Empty
+                    } else {
+                        val habits = it.toHomeUiModelList()
+                        _mutableState.value = HomeUiState.Success(habits)
+                    }
                 }
             } catch (e: Exception) {
                 _mutableState.value =

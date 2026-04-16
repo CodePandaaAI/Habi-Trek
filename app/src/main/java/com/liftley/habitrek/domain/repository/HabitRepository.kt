@@ -13,5 +13,5 @@ interface HabitRepository {
 
     suspend fun deleteHabit(habitId: Int)
 
-    suspend fun getHabitWithId(id: Int): Habit
+    suspend fun getHabitWithId(id: Int): Flow<Habit>
 }

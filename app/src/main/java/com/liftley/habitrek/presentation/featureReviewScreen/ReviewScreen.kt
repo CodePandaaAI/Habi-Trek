@@ -48,8 +48,8 @@ import com.liftley.habitrek.core.ui.components.ExpressiveIconButton
 import com.liftley.habitrek.core.ui.components.HabiTrekSectionThumbnail
 import com.liftley.habitrek.core.ui.components.HabiTrekSurface
 import com.liftley.habitrek.presentation.featureAddHabitScreen.components.ColorBall
-import com.liftley.habitrek.presentation.featureHomeScreen.components.HabiTrekErrorScreen
-import com.liftley.habitrek.presentation.featureHomeScreen.components.HabiTrekLoadingScreen
+import com.liftley.habitrek.core.ui.components.HabiTrekErrorScreen
+import com.liftley.habitrek.core.ui.components.HabiTrekLoadingScreen
 import com.liftley.habitrek.presentation.featureReviewScreen.components.MetricCard
 import com.liftley.habitrek.presentation.featureReviewScreen.components.SimpleCalendarGrid
 import com.liftley.habitrek.presentation.featureReviewScreen.model.ReviewUiState

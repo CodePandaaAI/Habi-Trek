@@ -15,8 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.core.designSystem.theme.LiftleyTheme
-import com.liftley.habitrek.presentation.featureHomeScreen.components.HabiTrekLoadingScreen
-import com.liftley.habitrek.presentation.featureHomeScreen.components.HabiTrekErrorScreen
+import com.liftley.habitrek.core.ui.components.HabiTrekEmptyScreen
+import com.liftley.habitrek.core.ui.components.HabiTrekLoadingScreen
+import com.liftley.habitrek.core.ui.components.HabiTrekErrorScreen
 import com.liftley.habitrek.presentation.featureHomeScreen.components.HabitCard
 import com.liftley.habitrek.presentation.featureHomeScreen.model.HomeUiState
 
@@ -27,6 +28,10 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
     when (val uiState = homeViewModel.state.collectAsState().value) {
         HomeUiState.Loading -> {
             HabiTrekLoadingScreen()
+        }
+
+        HomeUiState.Empty -> {
+            HabiTrekEmptyScreen()
         }
 
         is HomeUiState.Error -> {

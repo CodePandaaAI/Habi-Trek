@@ -1,7 +1,7 @@
 package com.liftley.habitrek.data.repository
 
 import com.liftley.habitrek.data.local.dao.HabitDao
-import com.liftley.habitrek.data.local.entity.toDomain
+import com.liftley.habitrek.data.local.entity.toDomainHabitFlow
 import com.liftley.habitrek.data.local.entity.toEntity
 import com.liftley.habitrek.data.local.entity.toFlowListHabit
 import com.liftley.habitrek.domain.model.Habit
@@ -26,7 +26,7 @@ class HabitRepositoryImpl @Inject constructor(private val habitDao: HabitDao): H
         habitDao.deleteHabit(habitId)
     }
 
-    override suspend fun getHabitWithId(id: Int): Habit {
-        return habitDao.getHabitWithId(id).toDomain()
+    override suspend fun getHabitWithId(id: Int): Flow<Habit> {
+        return habitDao.getHabitWithId(id).toDomainHabitFlow()
     }
 }
