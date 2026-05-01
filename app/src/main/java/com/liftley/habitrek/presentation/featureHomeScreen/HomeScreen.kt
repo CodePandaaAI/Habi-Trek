@@ -11,17 +11,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.LoadingIndicatorDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,7 +43,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.liftley.habitrek.core.theme.HabiTrekExpressiveTheme
 import com.liftley.habitrek.core.ui.components.ExpressiveIconButton
 import com.liftley.habitrek.core.ui.components.HabiTrekEmptyScreen
-import com.liftley.habitrek.core.ui.components.HabiTrekErrorScreen
 import com.liftley.habitrek.core.ui.components.HabiTrekLoadingScreen
 import com.liftley.habitrek.presentation.featureHomeScreen.components.HabitCard
 import com.liftley.habitrek.presentation.featureHomeScreen.model.HomeUiState
@@ -52,7 +53,28 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
     when (val uiState = homeViewModel.state.collectAsState().value) {
         HomeUiState.Loading -> HabiTrekLoadingScreen()
         HomeUiState.Empty -> HabiTrekEmptyScreen()
-        is HomeUiState.Error -> HabiTrekErrorScreen(message = uiState.message)
+        is HomeUiState.Error -> {
+            Box(
+                Modifier
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.Search,
+                        "Decorative",
+                        Modifier.size(48.dp)
+                    )
+
+                    Text(uiState.message, style = MaterialTheme.typography.titleLarge)
+                }
+            }
+        }
 
         is HomeUiState.Success -> {
             LazyColumn(
