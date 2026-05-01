@@ -11,6 +11,7 @@ import com.liftley.habitrek.data.local.entity.AiSummaryEntity
 import com.liftley.habitrek.data.local.entity.HabitEntity
 import com.liftley.habitrek.domain.repository.AiModelState
 import com.liftley.habitrek.domain.repository.AiSummaryRepository
+import com.liftley.habitrek.presentation.util.toDurationString
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -139,23 +140,23 @@ class AiSummaryRepositoryImpl @Inject constructor(
         val dataLines = topHabits.mapIndexed { index, habit ->
             val name = habit.name.take(MAX_HABIT_NAME_LENGTH)
             val totalDays = completionCounts[habit.id] ?: 0
-            val duration = habit.durationMinutes
-            val doneToday = if (habit.id in todayCompletedIds) "done today" else "not done today"
-            "${index + 1}. $name, completed $totalDays times total, $duration min per session, $doneToday"
+            val duration = habit.durationMinutes.toDurationString()
+            val doneToday = habit.id in todayCompletedIds
+            "${index + 1}. Name of habit: $name, Days completed: $totalDays, Target time everyday(Amount of time user wants to spend on this habit everyday): $duration, Is habit done today: $doneToday"
         }.joinToString("\n")
         Log.d(TAG, "Data lines:\n$dataLines")
 
         // Clear separation: INSTRUCTIONS first, then DATA
         return """
-Write a short casual summary about the user's habits in under 80 words. Rules:
-- Start directly with the summary. No greetings. No "Here is" or "Okay" or any introduction.
-- Write only one plain paragraph. No bullet points. No numbering. No bold. No italic. No asterisks. No special formatting.
-- Use only simple everyday English words that everyone knows.
-- Mention only the top 2 or 3 strongest habits by name.
-- End with a short friendly reminder about one important habit that is not done today.
-- Do not repeat or show the data below in your response.
+Write a short casual overview about the user's habits following these Rules:
 
-User's habits:
+- Start directly with the summary. No greetings. No "Here is" or "Okay" or any introduction.
+- Write only one plain paragraph, Please provide the summary as unformatted text.
+- Use only simple everyday English words.
+- Summarize strictly based on the provided data; do not extrapolate or invent details.
+- End with a short friendly reminder about one important looking habit that is not done today.
+
+User's habits full data to make summary from:
 $dataLines
         """.trimIndent()
     }

@@ -59,9 +59,9 @@ class GemmaSummarizer @Inject constructor() {
         val oneShotMemory = currentEngine.createConversation(
             ConversationConfig(
                 samplerConfig = SamplerConfig(
-                    topK = 16,
+                    topK = 24,
                     temperature = 0.4,
-                    topP = 0.85,
+                    topP = 0.95,
                 )
             )
         )

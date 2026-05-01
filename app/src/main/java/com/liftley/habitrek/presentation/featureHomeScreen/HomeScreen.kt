@@ -206,6 +206,7 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                                                         text = if (!it) uiState.aiSummary.take(
                                                             60
                                                         ) + "..." else uiState.aiSummary,
+                                                        modifier = Modifier.fillMaxWidth().align(Alignment.Start),
                                                         style = MaterialTheme.typography.bodyMedium,
                                                         color = MaterialTheme.colorScheme.onSecondaryContainer
                                                     )
