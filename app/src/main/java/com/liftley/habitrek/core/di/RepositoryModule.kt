@@ -1,8 +1,10 @@
 package com.liftley.habitrek.core.di
 
+import com.liftley.habitrek.data.repository.AiSummaryRepositoryImpl
 import com.liftley.habitrek.data.repository.CompletionRepositoryImpl
 import com.liftley.habitrek.data.repository.HabitRepositoryImpl
 import com.liftley.habitrek.data.repository.SearchRepositoryImpl
+import com.liftley.habitrek.domain.repository.AiSummaryRepository
 import com.liftley.habitrek.domain.repository.CompletionRepository
 import com.liftley.habitrek.domain.repository.HabitRepository
 import com.liftley.habitrek.domain.repository.SearchRepository
@@ -27,4 +29,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSearchRepository(impl: SearchRepositoryImpl): SearchRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAiSummaryRepository(impl: AiSummaryRepositoryImpl): AiSummaryRepository
 }

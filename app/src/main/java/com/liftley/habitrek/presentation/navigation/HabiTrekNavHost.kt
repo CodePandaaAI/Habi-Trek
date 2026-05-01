@@ -11,7 +11,7 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.liftley.habitrek.core.designSystem.theme.LiftleyTheme
+import com.liftley.habitrek.core.theme.HabiTrekExpressiveTheme
 import com.liftley.habitrek.core.ui.components.HabiTrekFloatingActionButton
 import com.liftley.habitrek.core.ui.components.HabiTrekNavigationBar
 import com.liftley.habitrek.core.ui.components.HabiTrekTopBarSelector
@@ -25,7 +25,7 @@ import com.liftley.habitrek.presentation.featureWebSearch.SearchScreen
 @Composable
 fun HabiTrekNavHost() {
     val navigationViewModel = hiltViewModel<NavigationViewModel>()
-    LiftleyTheme {
+    HabiTrekExpressiveTheme {
         Scaffold(
             topBar = { HabiTrekTopBarSelector(navigationViewModel) },
             bottomBar = { HabiTrekNavigationBar(navigationViewModel) },

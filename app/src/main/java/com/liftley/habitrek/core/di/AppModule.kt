@@ -2,12 +2,11 @@ package com.liftley.habitrek.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.liftley.habitrek.data.local.dao.AiSummaryDao
 import com.liftley.habitrek.data.local.dao.CompletionDao
 import com.liftley.habitrek.data.local.dao.HabitDao
 import com.liftley.habitrek.data.local.database.HabitTrackerAppDatabase
 import com.liftley.habitrek.data.remote.api.SearchApi
-import com.liftley.habitrek.data.repository.HabitRepositoryImpl
-import com.liftley.habitrek.domain.repository.HabitRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,8 +24,8 @@ object ApplicationModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): HabitTrackerAppDatabase {
         return Room.databaseBuilder(
-            context, HabitTrackerAppDatabase::class.java, "habit_tracker_database"
-        ).build()
+                context, HabitTrackerAppDatabase::class.java, "habit_tracker_database"
+            ).build()
     }
 
     @Provides
@@ -36,6 +35,10 @@ object ApplicationModule {
     @Provides
     @Singleton
     fun providesCompletionDao(database: HabitTrackerAppDatabase): CompletionDao = database.completionDao()
+
+    @Provides
+    @Singleton
+    fun providesAiSummaryDao(database: HabitTrackerAppDatabase): AiSummaryDao = database.aiSummaryDao()
 
     @Provides
     @Singleton

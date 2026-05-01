@@ -189,24 +189,20 @@ fun ReviewScreen(habitId: Int, onHabitDeleted: () -> Unit) {
                 // ----------------------------------------
                 // 2. METRICS SHOWCASE ROW
                 // ----------------------------------------
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    MetricCard(
-                        modifier = Modifier.weight(0.65f),
-                        title = "Daily Goal",
-                        value = habitDurationInHoursAndMinutes,
-                        icon = painterResource(R.drawable.outline_access_time_24)
-                    )
 
-                    MetricCard(
-                        modifier = Modifier.weight(0.35f),
-                        title = "Total Days",
-                        value = "$completionsTotal",
-                        icon = painterResource(R.drawable.outline_local_fire_department_24)
-                    )
-                }
+                MetricCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = "Daily Goal",
+                    value = habitDurationInHoursAndMinutes,
+                    icon = painterResource(R.drawable.outline_access_time_24)
+                )
+
+                MetricCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = "Total Days",
+                    value = "$completionsTotal",
+                    icon = painterResource(R.drawable.outline_local_fire_department_24)
+                )
 
                 // ----------------------------------------
                 // 3. MINIMAL CALENDAR SECTION

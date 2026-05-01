@@ -19,3 +19,16 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ===== LiteRT LM (Gemma on-device AI) =====
+# The native liblitertlm_jni.so calls back into these Java classes via JNI.
+# R8 must NOT rename, shrink, or remove them.
+-keep class com.google.ai.edge.litertlm.** { *; }
+-keepclassmembers class com.google.ai.edge.litertlm.** { *; }
+
+# Keep the JNI native method loader
+-keep class com.google.ai.edge.litertlm.NativeLibraryLoader { *; }
+
+# Keep TFLite runtime classes used by the engine
+-keep class org.tensorflow.lite.** { *; }
+-dontwarn org.tensorflow.lite.**

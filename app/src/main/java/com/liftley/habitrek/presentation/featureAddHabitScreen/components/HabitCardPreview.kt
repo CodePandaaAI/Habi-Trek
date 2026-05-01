@@ -16,7 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.liftley.habitrek.core.designSystem.theme.LiftleyTheme
+import com.liftley.habitrek.core.theme.HabiTrekExpressiveTheme
 import com.liftley.habitrek.presentation.util.toDurationString
 
 @Composable
@@ -65,7 +65,7 @@ fun HabitCardPreview(
 @Preview(showBackground = true)
 @Composable
 fun HabitCardPreviewP() {
-    LiftleyTheme {
+    HabiTrekExpressiveTheme {
         HabitCardPreview(
             habitName = "",
             habitDurationMinutes = 120,

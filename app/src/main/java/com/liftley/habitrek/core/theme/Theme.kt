@@ -1,7 +1,8 @@
-package com.liftley.habitrek.core.designSystem.theme
+package com.liftley.habitrek.core.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -9,6 +10,14 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.liftley.habitrek.core.designSystem.theme.Pink40
+import com.liftley.habitrek.core.designSystem.theme.Pink80
+import com.liftley.habitrek.core.designSystem.theme.Purple40
+import com.liftley.habitrek.core.designSystem.theme.Purple80
+import com.liftley.habitrek.core.designSystem.theme.PurpleGrey40
+import com.liftley.habitrek.core.designSystem.theme.PurpleGrey80
+import com.liftley.habitrek.core.designSystem.theme.Shapes
+import com.liftley.habitrek.core.designSystem.theme.Typography
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -33,7 +42,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun LiftleyTheme(
+fun HabiTrekExpressiveTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -49,7 +58,7 @@ fun LiftleyTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
+    MaterialExpressiveTheme(
         colorScheme = colorScheme,
         typography = Typography,
         shapes = Shapes,
