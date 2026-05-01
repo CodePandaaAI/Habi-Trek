@@ -29,9 +29,6 @@ class HomeViewModel @Inject constructor(
     private val _mutableState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState.Loading)
     val state: StateFlow<HomeUiState> = _mutableState.asStateFlow()
 
-    private val todayDateMillis =
-        LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-
     private val clickMutex = Mutex()
 
     init {
@@ -123,6 +120,7 @@ class HomeViewModel @Inject constructor(
     fun toggleHabitCompletion(habitId: Int) {
         viewModelScope.launch {
             clickMutex.withLock {
+                val todayDateMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
                 toggleHabitCompletionUseCase(habitId, todayDateMillis)
             }
         }

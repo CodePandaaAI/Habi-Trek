@@ -4,8 +4,8 @@ import com.liftley.habitrek.domain.repository.AiSummaryRepository
 import javax.inject.Inject
 
 /**
- * Generates an AI summary from current habit data, saves it to Room,
- * and schedules engine resource cleanup.
+ * Generates an AI summary from current habit data via the cloud SDK
+ * and saves it to Room.
  */
 class GenerateAiSummaryUseCase @Inject constructor(
     private val aiSummaryRepository: AiSummaryRepository

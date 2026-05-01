@@ -114,15 +114,15 @@ class AiSummaryRepositoryImpl @Inject constructor(
         }.joinToString("\n")
         Log.d(TAG, "Data lines:\n$dataLines")
 
-        // Clear separation: INSTRUCTIONS first, then DATA
+        // Construct final prompt
         return """
-Write a short casual summary about the user's habits in under 60 words. Rules to follow:
+Write a short casual overview summary about the user's habits in under 80 words. Rules to follow:
 
 - Start directly with the summary. No greetings. No "Here is" or "Okay" or any introduction.
 - Write only one plain paragraph. Please provide the response in plain text only, with no formatting or special characters.
 - Use only simple everyday English words that everyone knows.
-- ONLY say things the data supports. Do not make up streaks, months, or time periods not in the data. If there is little data, write a shorter summary.
-- Mention only the top 3 or 4 strongest habits by name.
+- ONLY say things the data supports. If there is little data, write a shorter summary.
+- Mention little about only the top 3 or 4 strongest habits.
 - End with a short friendly reminder about one important habit that is not done today.
 
 User's habits full data to make summary from:

@@ -15,9 +15,8 @@ class GetHabitsWithTodayStatusUseCase @Inject constructor(
     private val habitRepository: HabitRepository,
     private val completionRepository: CompletionRepository
 ) {
-    private val todayDateMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-
     operator fun invoke(): Flow<HabitListWithTodayStatusList> {
+        val todayDateMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         return combine(
             flow = habitRepository.getAllHabits(),
             flow2 = completionRepository.getIdOfAllHabitsCompletedForDate(todayDateMillis)

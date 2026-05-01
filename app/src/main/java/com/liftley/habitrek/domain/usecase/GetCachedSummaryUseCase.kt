@@ -4,8 +4,8 @@ import com.liftley.habitrek.domain.repository.AiSummaryRepository
 import javax.inject.Inject
 
 /**
- * Checks Room for today's cached AI summary.
- * Returns it without touching the AI engine.
+ * Retrieves today's cached AI summary from Room, if it exists.
+ * Bypasses network generation to save latency.
  */
 class GetCachedSummaryUseCase @Inject constructor(
     private val aiSummaryRepository: AiSummaryRepository

@@ -9,11 +9,12 @@ HabiTrek helps users build and maintain daily habits through a clean, interactiv
 ## Features
 
 ### 🏠 Home Screen
+- **AI Summary (Gemini Cloud)** — Uses Google's `gemini-2.5-flash-lite` model to provide a personalized, intelligent summary of the user's habits. Generates in ~1s using a strictly enforced system prompt to prevent hallucinations.
 - **Habit List** — All habits displayed in a unified card block with custom rounded corners (top card gets large top rounding, bottom card gets large bottom rounding, middle cards get uniform rounding), creating a cohesive visual stack.
 - **3D Tilt Animation** — Each habit card responds to touch with a real-time 3D tilt effect. Using `Animatable`, `graphicsLayer`, and `pointerInput`, the card tilts based on finger position relative to center, creating a tactile, premium feel.
 - **Checkmark Toggle** — A circular checkmark button with animated color fill and scale-on-press animation. Toggling marks the habit as completed for today, syncing immediately with the local Room database.
 - **Empty State** — When no habits exist, a centered butterfly icon with "No Habits Added Yet!" text provides a friendly, non-empty first impression.
-- **Sealed UI State** — The screen uses a sealed interface (`Loading`, `Success`, `Error`) to cleanly handle all possible screen states without ambiguity.
+- **Sealed UI State** — The screen uses a sealed interface (`Loading`, `Success`, `Error`, `Empty`) to cleanly handle all possible screen states without ambiguity.
 
 ### ➕ Add Habit Screen
 - **Habit Name Input** — Outlined text field with keyboard dismiss on Done action.
@@ -62,14 +63,18 @@ The Presentation layer depends on Domain. The Data layer depends on Domain. The 
 |----------------------------|----------------------------------------------------------------------------------------------------------------|
 | `HabitDao`                 | Room DAO for habit CRUD operations                                                                             |
 | `CompletionDao`            | Room DAO for completion records (marking days)                                                                 |
+| `AiSummaryDao`             | Room DAO for caching daily AI summaries                                                                        |
 | `HabitEntity`              | Room entity for the `habit_table`                                                                              |
 | `CompletionEntity`         | Room entity for the `completions` table with ForeignKey cascade                                                |
+| `AiSummaryEntity`          | Room entity for caching summaries to prevent excessive API calls                                               |
 | `HabitEntityMapper`        | Extension functions: `Habit.toEntity()`, `HabitEntity.toDomain()`, `Flow<List<HabitEntity>>.toFlowListHabit()` |
 | `CompletionEntityMapper`   | Extension functions: `Completion.toEntity()`, `Flow<List<CompletionEntity>>.toFlowCompletionList()`            |
 | `HabitRepositoryImpl`      | Implements domain `HabitRepository` interface, handles entity ↔ domain mapping                                 |
 | `CompletionRepositoryImpl` | Implements domain `CompletionRepository` interface                                                             |
 | `SearchRepositoryImpl`     | Implements domain `SearchRepository`, calls GNews API via Retrofit                                             |
-| `HabitTrackerAppDatabase`  | Room database exposing `habitDao()` and `completionDao()`                                                      |
+| `AiSummaryRepositoryImpl`  | Formats habit data into prompts, calls `GeminiSummarizer`, and caches responses via `AiSummaryDao`             |
+| `GeminiSummarizer`         | Minimal wrapper around the official `com.google.ai.client.generativeai` SDK                                    |
+| `HabitTrackerAppDatabase`  | Room database exposing all DAOs                                                                                |
 | `SearchApi`                | Retrofit interface for GNews API                                                                               |
 
 #### Domain Layer (`domain/`)
@@ -83,10 +88,13 @@ The Presentation layer depends on Domain. The Data layer depends on Domain. The 
 | `HabitRepository`                 | Interface for habit CRUD                                                            |
 | `CompletionRepository`            | Interface for completion CRUD and queries                                           |
 | `SearchRepository`                | Interface for web search, returns `List<SearchArticle>`                             |
+| `AiSummaryRepository`             | Interface for AI summary generation and caching                                     |
 | `GetHabitsWithTodayStatusUseCase` | Combines habits flow + today's completions flow into `HabitListWithTodayStatusList` |
 | `GetHabitCompletionsUseCase`      | Maps all completions for a habit into `HabitWithTodayStatus`                        |
 | `ToggleHabitCompletionUseCase`    | Checks if completion exists → deletes or creates accordingly                        |
 | `CreateHabitUseCase`              | Delegates habit creation to repository                                              |
+| `GenerateAiSummaryUseCase`        | Calls repo to generate a new AI summary via network                                 |
+| `GetCachedSummaryUseCase`         | Retrieves today's cached summary without network calls                              |
 
 #### Presentation Layer (`presentation/`)
 Each feature has its own package with `Screen`, `ViewModel`, `model/` (containing `UiState`, `UiModel`, `Mapper`).
@@ -120,6 +128,7 @@ Each feature has its own package with `Screen`, `ViewModel`, `model/` (containin
 | **DI**               | Hilt (Dagger)                                                       |
 | **Database**         | Room (SQLite)                                                       |
 | **Networking**       | Retrofit + Gson                                                     |
+| **AI Integration**   | Google Gemini SDK (`com.google.ai.client.generativeai`)             |
 | **Navigation**       | Jetpack Navigation 3                                                |
 | **Async**            | Kotlin Coroutines + Flow                                            |
 | **State Management** | StateFlow + MutableStateFlow                                        |
@@ -163,6 +172,20 @@ Colors are stored as Compose `Color.value` (`ULong`, 64-bit float representation
 4. **Navigation 3 with custom ViewModel-managed backstack.** Rather than using the older NavController, the app uses Navigation 3's `NavDisplay` with an `SnapshotStateList` backstack managed by a `NavigationViewModel`, enabling programmatic push/pop.
 
 5. **Assisted Injection for ReviewViewModel.** The `habitId` is a runtime navigation argument, not a Hilt-managed dependency. `@AssistedInject` + `@AssistedFactory` bridges this gap cleanly.
+
+---
+
+## Technical Journey: AI Architecture Evolution
+
+Originally, this project experimented with **100% on-device AI inference** using Google's `LiteRT` (formerly TFLite) and the `gemma-1b-it-int4` model. While theoretically ideal for privacy, the reality on mobile hardware was challenging:
+1. **Download Overhead:** Users were forced to download a ~550MB `.task` file before they could generate their first summary.
+2. **Resource Exhaustion:** Instantiating the 1B parameter model locally consumed massive amounts of RAM, frequently triggering Android's `onTrimMemory` callbacks and causing native C++ crashes on mid-tier devices.
+3. **Severe Hallucinations:** Because the 1B model lacked the reasoning capacity of larger cloud models, it struggled to adhere strictly to the JSON data schema. It frequently hallucinated habit names, invented long streaks that didn't exist in the database, and ignored formatting rules (like "no bullet points").
+
+**The Pivot:** We fully migrated to the cloud-based **Gemini API** (`gemini-2.5-flash-lite`) using the official Android SDK. 
+- The app size dropped significantly.
+- Responses are now nearly instantaneous (~1s) instead of freezing the UI during inference.
+- The massive context window and superior instruction-following of Flash 2.5 means the AI never hallucinates data and strictly adheres to our custom prompt rules, resulting in a much more magical user experience.
 
 ---
 
