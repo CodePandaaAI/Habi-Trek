@@ -1,7 +1,6 @@
 package com.liftley.habitrek.presentation.featureHomeScreen
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,11 +17,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -91,10 +89,6 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                 // AI Top Card Section
                 item {
                     var isSummaryExpanded by remember { mutableStateOf(false) }
-                    val animatedProgress by animateFloatAsState(
-                        targetValue = uiState.downloadProgress / 100f,
-                        label = "downloadProgress"
-                    )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -118,14 +112,30 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
-                                if (!uiState.isDownloading && !uiState.isAiLoading && uiState.aiSummary != null) {
-                                    ExpressiveIconButton(
-                                        color = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-                                        onClick = { isSummaryExpanded = !isSummaryExpanded },
-                                        modifier = Modifier,
-                                        imageVector = if (isSummaryExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                        contentDescription = null
-                                    )
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    if (!uiState.isAiLoading) {
+                                        ExpressiveIconButton(
+                                            color = IconButtonDefaults.iconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                            ),
+                                            onClick = { homeViewModel.onGenerateSummaryClick() },
+                                            modifier = Modifier,
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = if (uiState.aiSummary != null) "Regenerate Summary"
+                                            else "Generate Summary"
+                                        )
+                                    }
+                                    if (!uiState.isAiLoading && uiState.aiSummary != null) {
+                                        ExpressiveIconButton(
+                                            color = IconButtonDefaults.iconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceContainer
+                                            ),
+                                            onClick = { isSummaryExpanded = !isSummaryExpanded },
+                                            modifier = Modifier,
+                                            imageVector = if (isSummaryExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                            contentDescription = null
+                                        )
+                                    }
                                 }
                             }
 
@@ -140,52 +150,7 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                                     verticalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
 
-                                    if (uiState.isDownloading) {
-                                        LinearWavyProgressIndicator(
-                                            progress = {
-                                                animatedProgress
-                                            },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                                        )
-                                        Surface(
-                                            modifier = Modifier.padding(bottom = 8.dp),
-                                            shape = RoundedCornerShape(8.dp),
-                                            color = MaterialTheme.colorScheme.surfaceContainer
-                                        ) {
-                                            Text(
-                                                "Downloading... ${uiState.downloadProgress}%",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.padding(8.dp),
-                                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        }
-                                    } else if (!uiState.isModelDownloaded) {
-                                        Button(
-                                            onClick = { homeViewModel.downloadAiModel() },
-                                            modifier = Modifier.padding(16.dp)
-                                        ) {
-                                            Text(
-                                                "Download Brain (~549MB)",
-                                                modifier = Modifier.padding(bottom = 8.dp)
-                                            )
-                                        }
-                                        uiState.downloadError?.let {
-                                            Surface(
-                                                shape = RoundedCornerShape(8.dp),
-                                                color = MaterialTheme.colorScheme.surfaceContainer,
-                                                modifier = Modifier.padding(bottom = 8.dp)
-                                            ) {
-                                                Text(
-                                                    text = it,
-                                                    color = MaterialTheme.colorScheme.error,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    modifier = Modifier.padding(8.dp)
-                                                )
-                                            }
-                                        }
-                                    } else if (uiState.isAiLoading) {
+                                    if (uiState.isAiLoading) {
                                         LoadingIndicator(
                                             modifier = Modifier.padding(
                                                 horizontal = 16.dp,
@@ -193,32 +158,18 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
                                             )
                                         )
                                     } else {
-                                        Column(
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .padding(16.dp),
-                                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                                            horizontalAlignment = Alignment.End
-                                        ) {
-                                            if (uiState.aiSummary != null) {
-                                                AnimatedContent(isSummaryExpanded) {
-                                                    Text(
-                                                        text = if (!it) uiState.aiSummary.take(
-                                                            60
-                                                        ) + "..." else uiState.aiSummary,
-                                                        modifier = Modifier.fillMaxWidth().align(Alignment.Start),
-                                                        style = MaterialTheme.typography.bodyMedium,
-                                                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                                                    )
-                                                }
-                                            }
-                                            Button(
-                                                onClick = { homeViewModel.onGenerateSummaryClick() },
-                                                modifier = Modifier
-                                            ) {
+                                        if (uiState.aiSummary != null) {
+                                            AnimatedContent(isSummaryExpanded) {
                                                 Text(
-                                                    if (uiState.aiSummary != null) "Regenerate Summary"
-                                                    else "Generate Summary"
+                                                    text = if (!it) uiState.aiSummary.take(
+                                                        60
+                                                    ) + "..." else uiState.aiSummary,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(16.dp)
+                                                        .align(Alignment.Start),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
                                                 )
                                             }
                                         }

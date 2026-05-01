@@ -8,11 +8,7 @@ sealed interface HomeUiState {
     data class Success(
         val habits: List<HomeUiModel>,
         val aiSummary: String? = null,
-        val isAiLoading: Boolean = false,
-        val isModelDownloaded: Boolean = false,
-        val isDownloading: Boolean = false,
-        val downloadProgress: Int = 0,
-        val downloadError: String? = null
+        val isAiLoading: Boolean = false
     ): HomeUiState
     
     data class Error(val message: String): HomeUiState

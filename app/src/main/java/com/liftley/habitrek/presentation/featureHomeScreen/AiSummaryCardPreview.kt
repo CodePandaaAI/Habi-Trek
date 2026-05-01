@@ -23,13 +23,8 @@ import com.liftley.habitrek.core.theme.HabiTrekExpressiveTheme
  */
 @Composable
 fun AiSummaryCard(
-    isDownloading: Boolean = false,
-    downloadProgress: Int = 0,
-    isModelDownloaded: Boolean = false,
     isAiLoading: Boolean = false,
     aiSummary: String? = null,
-    downloadError: String? = null,
-    onDownloadClick: () -> Unit = {},
     onGenerateSummaryClick: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -49,34 +44,7 @@ fun AiSummaryCard(
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
 
-                if (isDownloading) {
-                    LinearWavyProgressIndicator(
-                        progress = { downloadProgress / 100f },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Text(
-                        "Downloading... ${downloadProgress}%",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                } else if (!isModelDownloaded) {
-                    Button(
-                        onClick = onDownloadClick,
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        Text("Download Brain (~500MB)")
-                    }
-                    downloadError?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                } else if (isAiLoading) {
+                if (isAiLoading) {
                     LinearWavyProgressIndicator()
                     Text(
                         "Generating summary...",
@@ -110,44 +78,11 @@ fun AiSummaryCard(
 
 // ── Previews ──────────────────────────────────────────────
 
-@Preview(name = "Not Downloaded", showBackground = true)
-@Composable
-private fun PreviewNotDownloaded() {
-    HabiTrekExpressiveTheme {
-        AiSummaryCard(
-            isModelDownloaded = false
-        )
-    }
-}
-
-@Preview(name = "Not Downloaded + Error", showBackground = true)
-@Composable
-private fun PreviewNotDownloadedError() {
-    HabiTrekExpressiveTheme {
-        AiSummaryCard(
-            isModelDownloaded = false,
-            downloadError = "Network error: connection timed out"
-        )
-    }
-}
-
-@Preview(name = "Downloading 42%", showBackground = true)
-@Composable
-private fun PreviewDownloading() {
-    HabiTrekExpressiveTheme {
-        AiSummaryCard(
-            isDownloading = true,
-            downloadProgress = 42
-        )
-    }
-}
-
 @Preview(name = "AI Loading", showBackground = true)
 @Composable
 private fun PreviewAiLoading() {
     HabiTrekExpressiveTheme {
         AiSummaryCard(
-            isModelDownloaded = true,
             isAiLoading = true
         )
     }
@@ -158,7 +93,6 @@ private fun PreviewAiLoading() {
 private fun PreviewNoSummaryYet() {
     HabiTrekExpressiveTheme {
         AiSummaryCard(
-            isModelDownloaded = true,
             aiSummary = null
         )
     }
@@ -169,7 +103,6 @@ private fun PreviewNoSummaryYet() {
 private fun PreviewSummaryReady() {
     HabiTrekExpressiveTheme {
         AiSummaryCard(
-            isModelDownloaded = true,
             aiSummary = "Your meditation streak of 45 days is incredible — that kind of consistency rewires your brain. Don't forget your evening walk today, even 10 minutes will reset your energy."
         )
     }

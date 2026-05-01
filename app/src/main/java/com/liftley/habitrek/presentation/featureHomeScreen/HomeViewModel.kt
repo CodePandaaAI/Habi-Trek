@@ -2,12 +2,9 @@ package com.liftley.habitrek.presentation.featureHomeScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.liftley.habitrek.domain.repository.AiModelState
-import com.liftley.habitrek.domain.usecase.DownloadAiModelUseCase
 import com.liftley.habitrek.domain.usecase.GenerateAiSummaryUseCase
 import com.liftley.habitrek.domain.usecase.GetCachedSummaryUseCase
 import com.liftley.habitrek.domain.usecase.GetHabitsWithTodayStatusUseCase
-import com.liftley.habitrek.domain.usecase.ObserveAiModelStateUseCase
 import com.liftley.habitrek.domain.usecase.ToggleHabitCompletionUseCase
 import com.liftley.habitrek.presentation.featureHomeScreen.model.HomeUiState
 import com.liftley.habitrek.presentation.featureHomeScreen.model.toHomeUiModelList
@@ -26,8 +23,6 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getHabitsWithTodayStatusUseCase: GetHabitsWithTodayStatusUseCase,
     private val toggleHabitCompletionUseCase: ToggleHabitCompletionUseCase,
-    private val observeAiModelStateUseCase: ObserveAiModelStateUseCase,
-    private val downloadAiModelUseCase: DownloadAiModelUseCase,
     private val generateAiSummaryUseCase: GenerateAiSummaryUseCase,
     private val getCachedSummaryUseCase: GetCachedSummaryUseCase
 ) : ViewModel() {
@@ -41,7 +36,6 @@ class HomeViewModel @Inject constructor(
 
     init {
         observeHabits()
-        observeAiModelState()
     }
 
     private fun observeHabits() {
@@ -52,74 +46,24 @@ class HomeViewModel @Inject constructor(
                         _mutableState.value = HomeUiState.Empty
                     } else {
                         val habits = it.toHomeUiModelList()
-                        val isReady =
-                            observeAiModelStateUseCase().value is AiModelState.Ready
-
+                        
                         // Preserve existing AI summary state if we already have it
                         val currentState = _mutableState.value
                         val existingSummary = (currentState as? HomeUiState.Success)?.aiSummary
 
                         _mutableState.value = HomeUiState.Success(
                             habits = habits,
-                            isModelDownloaded = isReady,
                             aiSummary = existingSummary
                         )
 
-                        // On first load, try to fetch today's cached summary from DB
-                        if (existingSummary == null && isReady) {
+                        // Try to fetch today's cached summary from DB
+                        if (existingSummary == null) {
                             loadCachedSummary()
                         }
                     }
                 }
             } catch (e: Exception) {
                 _mutableState.value = HomeUiState.Error(message = "Something Went Wrong")
-            }
-        }
-    }
-
-    private fun observeAiModelState() {
-        viewModelScope.launch {
-            observeAiModelStateUseCase().collect { modelState ->
-                val currentState = _mutableState.value
-                if (currentState is HomeUiState.Success) {
-                    when (modelState) {
-                        is AiModelState.NotDownloaded -> {
-                            _mutableState.value = currentState.copy(
-                                isModelDownloaded = false,
-                                isDownloading = false
-                            )
-                        }
-
-                        is AiModelState.Downloading -> {
-                            _mutableState.value = currentState.copy(
-                                isModelDownloaded = false,
-                                isDownloading = true,
-                                downloadProgress = modelState.progress,
-                                downloadError = null
-                            )
-                        }
-
-                        is AiModelState.Ready -> {
-                            _mutableState.value = currentState.copy(
-                                isModelDownloaded = true,
-                                isDownloading = false,
-                                downloadError = null
-                            )
-                            // When model becomes ready, try loading cached summary
-                            if (currentState.aiSummary == null) {
-                                loadCachedSummary()
-                            }
-                        }
-
-                        is AiModelState.Error -> {
-                            _mutableState.value = currentState.copy(
-                                isModelDownloaded = false,
-                                isDownloading = false,
-                                downloadError = modelState.message
-                            )
-                        }
-                    }
-                }
             }
         }
     }
@@ -144,12 +88,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun downloadAiModel() {
-        val url =
-            "https://github.com/CodePandaaAI/Habi-Trek/releases/download/v0.1.0-beta/gemma3-1b-it-int4.task"
-        downloadAiModelUseCase(url)
-    }
-
     /**
      * Called explicitly by the user via the "Generate Summary" button.
      * This is the ONLY way a summary gets generated — never automatic.
@@ -170,10 +108,11 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 val freshState = _mutableState.value
                 if (freshState is HomeUiState.Success) {
                     _mutableState.value = freshState.copy(
-                        aiSummary = "AI Error: ${e.message}",
+                        aiSummary = "Unable to generate summary right now. Please check your internet connection.",
                         isAiLoading = false
                     )
                 }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -14,6 +16,13 @@ android {
         }
     }
 
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+    val geminiApiKey = properties.getProperty("GEMINI_API_KEY", "")
+
     defaultConfig {
         applicationId = "com.liftley.habitrek"
         minSdk = 30
@@ -22,6 +31,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${geminiApiKey}\"")
 
         ndk {
             abiFilters += listOf("arm64-v8a")
@@ -47,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -89,5 +101,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(libs.litertlm)
+    implementation(libs.generativeai)
 }

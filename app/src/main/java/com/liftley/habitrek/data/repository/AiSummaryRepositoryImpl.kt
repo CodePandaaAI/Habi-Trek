@@ -1,73 +1,31 @@
 package com.liftley.habitrek.data.repository
 
 import android.util.Log
-import com.liftley.habitrek.data.ai.DownloadState
-import com.liftley.habitrek.data.ai.GemmaSummarizer
-import com.liftley.habitrek.data.ai.ModelDownloader
+import com.liftley.habitrek.data.ai.GeminiSummarizer
 import com.liftley.habitrek.data.local.dao.AiSummaryDao
 import com.liftley.habitrek.data.local.dao.CompletionDao
 import com.liftley.habitrek.data.local.dao.HabitDao
 import com.liftley.habitrek.data.local.entity.AiSummaryEntity
 import com.liftley.habitrek.data.local.entity.HabitEntity
-import com.liftley.habitrek.domain.repository.AiModelState
 import com.liftley.habitrek.domain.repository.AiSummaryRepository
 import com.liftley.habitrek.presentation.util.toDurationString
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneOffset
 
 private const val TAG = "AiSummaryRepo"
-private const val RESOURCE_RELEASE_DELAY_MS = 2 * 60 * 1000L // 2 minutes
 private const val MAX_HABITS_FOR_PROMPT = 6
 private const val MAX_HABIT_NAME_LENGTH = 35
 
 @Singleton
 class AiSummaryRepositoryImpl @Inject constructor(
-    private val modelDownloader: ModelDownloader,
-    private val gemmaSummarizer: GemmaSummarizer,
+    private val geminiSummarizer: GeminiSummarizer,
     private val aiSummaryDao: AiSummaryDao,
     private val completionDao: CompletionDao,
     private val habitDao: HabitDao
 ) : AiSummaryRepository {
-
-    // Structured scope with SupervisorJob — child failures don't cancel siblings
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private var releaseJob: Job? = null
-
-    private val _downloadState = MutableStateFlow(
-        if (modelDownloader.isModelDownloaded()) AiModelState.Ready else AiModelState.NotDownloaded
-    )
-    override val downloadState: StateFlow<AiModelState> = _downloadState.asStateFlow()
-
-    init {
-        scope.launch {
-            modelDownloader.downloadState.collect { dataState ->
-                _downloadState.value = when (dataState) {
-                    is DownloadState.NotDownloaded -> AiModelState.NotDownloaded
-                    is DownloadState.Downloading -> AiModelState.Downloading(dataState.progress)
-                    is DownloadState.Downloaded -> AiModelState.Ready
-                    is DownloadState.Error -> AiModelState.Error(dataState.message)
-                }
-            }
-        }
-    }
-
-    override fun isModelReady(): Boolean = modelDownloader.isModelDownloaded()
-
-    override fun startModelDownload(url: String) {
-        modelDownloader.startDownload(url)
-    }
 
     override suspend fun getCachedSummaryForToday(): String? {
         val todayMillis = todayStartMillis()
@@ -75,41 +33,51 @@ class AiSummaryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun generateAndSaveSummary(): String {
-        if (!modelDownloader.isModelDownloaded()) {
-            throw IllegalStateException("Model not downloaded yet!")
-        }
-
-        // Cancel any pending resource release since we need the engine
-        releaseJob?.cancel()
-
         // Build the smart compact prompt from DB data
         val prompt = buildSmartPrompt()
         Log.d(TAG, "Prompt: $prompt")
 
-        // Initialize engine and generate
-        gemmaSummarizer.initializeEngine(modelDownloader.modelFile.absolutePath)
-        val result = gemmaSummarizer.generate(prompt)
-        Log.d(TAG, "Generated summary: ${result.take(100)}...")
+        // Generate via cloud API
+        val rawResult = geminiSummarizer.generate(prompt)
+        Log.d(TAG, "Generated summary raw: ${rawResult.take(100)}...")
 
+        // Clean up any formatting artifacts the model might have returned
+        val cleanResult = cleanSummary(rawResult)
+        
         // Save to Room
         val todayMillis = todayStartMillis()
         aiSummaryDao.upsertSummary(
             AiSummaryEntity(
                 dateMillis = todayMillis,
-                summary = result
+                summary = cleanResult
             )
         )
 
-        // Schedule resource release after 2 minutes
-        scheduleResourceRelease()
-
-        return result
+        return cleanResult
     }
 
-    override fun releaseResources() {
-        Log.d(TAG, "Releasing engine resources")
-        releaseJob?.cancel()
-        gemmaSummarizer.close()
+    // ── Post Processing ───────────────────────────────────────
+
+    private fun cleanSummary(raw: String): String {
+        return raw
+            .lines()
+            .filterNot { line ->
+                // Drop lines that look like data format echoed back
+                val lower = line.trimStart().lowercase()
+                lower.startsWith("name of habit:") ||
+                lower.startsWith("days completed:") ||
+                lower.contains("target time everyday") ||
+                lower.contains("user's habits") ||
+                lower.startsWith("here is") ||
+                lower.startsWith("okay")
+            }
+            .joinToString(" ")
+            .replace(Regex("[*_#>]"), "")          // Strip markdown formatting
+            .replace(Regex("^\\d+\\.\\s"), "")     // Strip leading "1. "
+            .replace(Regex("- "), "")              // Strip bullet dashes
+            .replace(Regex("\\s+"), " ")           // Collapse whitespace
+            .trim()
+            .take(400)                              // Hard cap length
     }
 
     // ── Smart Prompt Builder ──────────────────────────────────
@@ -136,7 +104,7 @@ class AiSummaryRepositoryImpl @Inject constructor(
             .sortedByDescending { completionCounts[it.id] ?: 0 }
             .take(MAX_HABITS_FOR_PROMPT)
 
-        // Build natural language data lines — easier for a 1B model to parse
+        // Build natural language data lines
         val dataLines = topHabits.mapIndexed { index, habit ->
             val name = habit.name.take(MAX_HABIT_NAME_LENGTH)
             val totalDays = completionCounts[habit.id] ?: 0
@@ -148,13 +116,14 @@ class AiSummaryRepositoryImpl @Inject constructor(
 
         // Clear separation: INSTRUCTIONS first, then DATA
         return """
-Write a short casual overview about the user's habits following these Rules:
+Write a short casual summary about the user's habits in under 60 words. Rules to follow:
 
 - Start directly with the summary. No greetings. No "Here is" or "Okay" or any introduction.
-- Write only one plain paragraph, Please provide the summary as unformatted text.
-- Use only simple everyday English words.
-- Summarize strictly based on the provided data; do not extrapolate or invent details.
-- End with a short friendly reminder about one important looking habit that is not done today.
+- Write only one plain paragraph. Please provide the response in plain text only, with no formatting or special characters.
+- Use only simple everyday English words that everyone knows.
+- ONLY say things the data supports. Do not make up streaks, months, or time periods not in the data. If there is little data, write a shorter summary.
+- Mention only the top 3 or 4 strongest habits by name.
+- End with a short friendly reminder about one important habit that is not done today.
 
 User's habits full data to make summary from:
 $dataLines
@@ -165,14 +134,5 @@ $dataLines
 
     private fun todayStartMillis(): Long {
         return LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-    }
-
-    private fun scheduleResourceRelease() {
-        releaseJob?.cancel()
-        releaseJob = scope.launch {
-            delay(RESOURCE_RELEASE_DELAY_MS)
-            Log.d(TAG, "Timer expired — releasing engine resources")
-            gemmaSummarizer.close()
-        }
     }
 }
