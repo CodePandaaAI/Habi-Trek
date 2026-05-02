@@ -106,7 +106,7 @@ fun AiSummaryCard(
             if (uiState.aiSummary == null && !uiState.isGeneratingSummary) return@Column
             Surface(
                 modifier = Modifier
-                    .padding(top = 8.dp)
+                    .padding(top = if (isSummaryExpanded || uiState.isGeneratingSummary) 8.dp else 0.dp)
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 shape = RoundedCornerShape(16.dp)
