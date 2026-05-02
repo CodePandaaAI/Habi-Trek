@@ -60,24 +60,11 @@ class AiSummaryRepositoryImpl @Inject constructor(
 
     private fun cleanSummary(raw: String): String {
         return raw
-            .lines()
-            .filterNot { line ->
-                // Drop lines that look like data format echoed back
-                val lower = line.trimStart().lowercase()
-                lower.startsWith("name of habit:") ||
-                lower.startsWith("days completed:") ||
-                lower.contains("target time everyday") ||
-                lower.contains("user's habits") ||
-                lower.startsWith("here is") ||
-                lower.startsWith("okay")
-            }
-            .joinToString(" ")
             .replace(Regex("[*_#>]"), "")          // Strip markdown formatting
             .replace(Regex("^\\d+\\.\\s"), "")     // Strip leading "1. "
             .replace(Regex("- "), "")              // Strip bullet dashes
             .replace(Regex("\\s+"), " ")           // Collapse whitespace
             .trim()
-            .take(400)                              // Hard cap length
     }
 
     // ── Smart Prompt Builder ──────────────────────────────────

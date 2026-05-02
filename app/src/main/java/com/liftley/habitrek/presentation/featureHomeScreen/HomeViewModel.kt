@@ -94,14 +94,14 @@ class HomeViewModel @Inject constructor(
         if (currentState !is HomeUiState.Success) return
 
         viewModelScope.launch {
-            _mutableState.value = currentState.copy(isAiLoading = true)
+            _mutableState.value = currentState.copy(isGeneratingSummary = true)
             try {
                 val result = generateAiSummaryUseCase()
                 val freshState = _mutableState.value
                 if (freshState is HomeUiState.Success) {
                     _mutableState.value = freshState.copy(
                         aiSummary = result,
-                        isAiLoading = false
+                        isGeneratingSummary = false
                     )
                 }
             } catch (e: Exception) {
@@ -110,7 +110,7 @@ class HomeViewModel @Inject constructor(
                 if (freshState is HomeUiState.Success) {
                     _mutableState.value = freshState.copy(
                         aiSummary = "Unable to generate summary right now. Please check your internet connection.",
-                        isAiLoading = false
+                        isGeneratingSummary = false
                     )
                 }
             }

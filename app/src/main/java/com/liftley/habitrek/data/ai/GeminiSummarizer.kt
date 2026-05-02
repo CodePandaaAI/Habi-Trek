@@ -1,7 +1,7 @@
 package com.liftley.habitrek.data.ai
 
-import com.google.ai.client.generativeai.GenerativeModel
 import com.liftley.habitrek.BuildConfig
+import com.google.ai.client.generativeai.GenerativeModel
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.Dispatchers

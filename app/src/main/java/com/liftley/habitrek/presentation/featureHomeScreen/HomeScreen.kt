@@ -42,12 +42,14 @@ import com.liftley.habitrek.core.theme.HabiTrekExpressiveTheme
 import com.liftley.habitrek.core.ui.components.ExpressiveIconButton
 import com.liftley.habitrek.core.ui.components.HabiTrekEmptyScreen
 import com.liftley.habitrek.core.ui.components.HabiTrekLoadingScreen
+import com.liftley.habitrek.presentation.featureHomeScreen.components.AiSummaryCard
 import com.liftley.habitrek.presentation.featureHomeScreen.components.HabitCard
 import com.liftley.habitrek.presentation.featureHomeScreen.model.HomeUiState
 
 @Composable
 fun HomScreen(onHabitClick: (Int) -> Unit) {
     val homeViewModel = hiltViewModel<HomeViewModel>()
+    var isSummaryExpanded by remember { mutableStateOf(false) }
     when (val uiState = homeViewModel.state.collectAsState().value) {
         HomeUiState.Loading -> HabiTrekLoadingScreen()
         HomeUiState.Empty -> HabiTrekEmptyScreen()
@@ -88,95 +90,12 @@ fun HomScreen(onHabitClick: (Int) -> Unit) {
             ) {
                 // AI Top Card Section
                 item {
-                    var isSummaryExpanded by remember { mutableStateOf(false) }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.surface),
-                        contentAlignment = Alignment.Center
+                    AiSummaryCard(
+                        state = { uiState },
+                        onGenerateSummaryClick = { homeViewModel.onGenerateSummaryClick() },
+                        isSummaryExpanded = { isSummaryExpanded }
                     ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Row(
-                                Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    "AI Summary",
-                                    modifier = Modifier.padding(start = 16.dp),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    if (!uiState.isAiLoading) {
-                                        ExpressiveIconButton(
-                                            color = IconButtonDefaults.iconButtonColors(
-                                                containerColor = MaterialTheme.colorScheme.surfaceContainer
-                                            ),
-                                            onClick = { homeViewModel.onGenerateSummaryClick() },
-                                            modifier = Modifier,
-                                            imageVector = Icons.Default.Refresh,
-                                            contentDescription = if (uiState.aiSummary != null) "Regenerate Summary"
-                                            else "Generate Summary"
-                                        )
-                                    }
-                                    if (!uiState.isAiLoading && uiState.aiSummary != null) {
-                                        ExpressiveIconButton(
-                                            color = IconButtonDefaults.iconButtonColors(
-                                                containerColor = MaterialTheme.colorScheme.surfaceContainer
-                                            ),
-                                            onClick = { isSummaryExpanded = !isSummaryExpanded },
-                                            modifier = Modifier,
-                                            imageVector = if (isSummaryExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-                            }
-
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-
-                                    if (uiState.isAiLoading) {
-                                        LoadingIndicator(
-                                            modifier = Modifier.padding(
-                                                horizontal = 16.dp,
-                                                vertical = 16.dp
-                                            )
-                                        )
-                                    } else {
-                                        if (uiState.aiSummary != null) {
-                                            AnimatedContent(isSummaryExpanded) {
-                                                Text(
-                                                    text = if (!it) uiState.aiSummary.take(
-                                                        60
-                                                    ) + "..." else uiState.aiSummary,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(16.dp)
-                                                        .align(Alignment.Start),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        isSummaryExpanded = it
                     }
                 }
 
