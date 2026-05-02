@@ -9,7 +9,7 @@ HabiTrek helps users build and maintain daily habits through a clean, interactiv
 ## Features
 
 ### 🏠 Home Screen
-- **AI Summary (Gemini Cloud)** — Uses Google's `gemini-2.5-flash-lite` model to provide a personalized, intelligent summary of the user's habits. Generates in ~1s using a strictly enforced system prompt to prevent hallucinations.
+- **AI Summary (Gemini Cloud)** — An interactive, expandable/collapsible `AiSummaryCard` that uses Google's `gemini-2.5-flash-lite` model to provide a personalized, intelligent summary of the user's habits. It automatically expands when generating a new summary and defaults to an expanded view for quick insights. Generates in ~1s using a strictly enforced system prompt to prevent hallucinations.
 - **Habit List** — All habits displayed in a unified card block with custom rounded corners (top card gets large top rounding, bottom card gets large bottom rounding, middle cards get uniform rounding), creating a cohesive visual stack.
 - **3D Tilt Animation** — Each habit card responds to touch with a real-time 3D tilt effect. Using `Animatable`, `graphicsLayer`, and `pointerInput`, the card tilts based on finger position relative to center, creating a tactile, premium feel.
 - **Checkmark Toggle** — A circular checkmark button with animated color fill and scale-on-press animation. Toggling marks the habit as completed for today, syncing immediately with the local Room database.
@@ -101,7 +101,7 @@ Each feature has its own package with `Screen`, `ViewModel`, `model/` (containin
 
 | Feature                 | Key Components                                                                                                                                           |
 |-------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `featureHomeScreen`     | `HomScreen`, `HomeViewModel`, `HomeUiState` (sealed), `HomeUiModel`, `HomeUiModelMapper`, `HabitCard`                                                    |
+| `featureHomeScreen`     | `HomScreen`, `HomeViewModel`, `HomeUiState` (sealed), `HomeUiModel`, `HomeUiModelMapper`, `HabitCard`, `AiSummaryCard`                                   |
 | `featureAddHabitScreen` | `AddHabitScreen`, `AddHabitViewModel`, `AddHabitUiState`, `AddHabitUiModel`, `HabitCardPreview`, `ColorBall`                                             |
 | `featureReviewScreen`   | `ReviewScreen`, `ReviewViewModel` (AssistedInject), `ReviewUiState` (sealed), `ReviewUiModel`, `ReviewUiModelMapper`, `SimpleCalendarGrid`, `MetricCard` |
 | `featureWebSearch`      | `SearchScreen`, `SearchViewModel`, `SearchScreenState` (sealed), `SearchArticle` (domain), `SearchResultItem`                                            |
@@ -173,6 +173,8 @@ Colors are stored as Compose `Color.value` (`ULong`, 64-bit float representation
 
 5. **Assisted Injection for ReviewViewModel.** The `habitId` is a runtime navigation argument, not a Hilt-managed dependency. `@AssistedInject` + `@AssistedFactory` bridges this gap cleanly.
 
+6. **Dynamic Timestamp Calculation.** UseCases (like `GetHabitCompletionsUseCase`) dynamically calculate `todayDateMillis` upon invocation rather than relying on static or ViewModel-level properties. This prevents stale date bugs when the app is left open in the background across midnight.
+
 ---
 
 ## Technical Journey: AI Architecture Evolution
@@ -217,9 +219,9 @@ com.liftley.habitrek/
 ├── data/
 │   ├── di/                          # (empty, modules in core/di)
 │   ├── local/
-│   │   ├── dao/                     # HabitDao, CompletionDao
-│   │   ├── database/                # RoomDatabase
-│   │   └── entity/                  # Entities + Mappers
+│   │   ├── dao/                     # HabitDao, CompletionDao, AiSummaryDao
+│   │   ├── database/                # HabitTrackerAppDatabase
+│   │   └── entity/                  # Entities (Habit, Completion, AiSummary) + Mappers
 │   ├── remote/
 │   │   ├── api/                     # SearchApi + GNews DTOs
 │   │   └── dto/                     # (placeholder for future DTOs)
@@ -231,9 +233,9 @@ com.liftley.habitrek/
 └── presentation/
     ├── featureAddHabitScreen/
     │   ├── components/              # ColorBall, HabitCardPreview
-    │   └── model/                   # AddHabitUiState, AddHabitUiModel
+    │   └── model/                   # AddHabitUiState, AddHabituiModel
     ├── featureHomeScreen/
-    │   ├── components/              # HabitCard
+    │   ├── components/              # HabitCard, AiSummaryCard
     │   └── model/                   # HomeUiState, HomeUiModel, Mapper
     ├── featureReviewScreen/
     │   ├── components/              # SimpleCalendarGrid, MetricCard
