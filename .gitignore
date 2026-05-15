@@ -5,6 +5,7 @@
 .DS_Store
 /build
 /captures
+AI_CONTEXT.md
 .externalNativeBuild
 .cxx
 local.properties
