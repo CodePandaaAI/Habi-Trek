@@ -9,12 +9,10 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 class GetHabitCompletionsUseCase @Inject constructor(private val completionRepository: CompletionRepository) {
-    private val todayDateMillis = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
-
     operator fun invoke(habitId: Int): Flow<HabitWithTodayStatus> {
         return completionRepository.getAllCompletionsForHabitWithId(habitId).map { completions ->
             val timestamps = completions.map { it.dateMillis }.toSet()
-            val today = todayDateMillis
+            val today = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
 
             HabitWithTodayStatus(
                 completedTimestamps = timestamps,

@@ -42,4 +42,15 @@ interface CompletionDao {
      */
     @Query("SELECT * FROM completions Where habitId = :habitId")
     fun getAllCompletionsForHabitWithId(habitId: Int): Flow<List<CompletionEntity>>
+
+    /*
+    Get total completion count per habit, used for AI prompt ranking.
+     */
+    @Query("SELECT habitId, COUNT(*) as totalCount FROM completions GROUP BY habitId")
+    suspend fun getCompletionCountsPerHabit(): List<HabitCompletionCount>
 }
+
+data class HabitCompletionCount(
+    val habitId: Int,
+    val totalCount: Int
+)

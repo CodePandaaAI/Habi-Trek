@@ -62,6 +62,7 @@ fun HabiTrekTopBarWithIconButton(onBack: () -> Unit = {}, title: () -> String) {
             ExpressiveIconButton(
                 onClick = onBack,
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                modifier = Modifier.padding(start = 8.dp),
                 contentDescription = "Back Button"
             )
         },
