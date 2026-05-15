@@ -1,5 +1,7 @@
 package com.liftley.habitrek.presentation.navigation
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +26,7 @@ import com.liftley.habitrek.presentation.featureWebSearch.SearchScreen
 
 @Composable
 fun HabiTrekNavHost() {
-    val navigationViewModel = hiltViewModel<NavigationViewModel>()
+    val navigationViewModel = hiltViewModel<NavigationViewModel>(viewModelStoreOwner = LocalActivity.current as ComponentActivity)
     HabiTrekExpressiveTheme {
         Scaffold(
             topBar = { HabiTrekTopBarSelector(navigationViewModel) },
