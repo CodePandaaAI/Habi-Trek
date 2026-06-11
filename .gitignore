@@ -9,3 +9,8 @@ AI_CONTEXT.md
 .externalNativeBuild
 .cxx
 local.properties
+/gallery/
+/gemma-3-1b-it/
+/gemma3-1b-it-int4.task
+/HabiTrek_Internship_Report.html
+/HabiTrek_Internship_Report.md
