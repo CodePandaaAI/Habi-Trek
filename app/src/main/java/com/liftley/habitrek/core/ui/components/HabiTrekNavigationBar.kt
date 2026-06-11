@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -22,9 +21,7 @@ import com.liftley.habitrek.core.ui.navigation.NavigationViewModel
 @Composable
 fun HabiTrekNavigationBar(navigationViewModel: NavigationViewModel) {
     // Show bottom bar only on Home and Search screens
-    if (navigationViewModel.checkStack(NavRoutes.Home) || navigationViewModel.checkStack(
-            NavRoutes.SearchScreen
-        )
+    if (navigationViewModel.checkStack(NavRoutes.Home)
     ) {
         NavigationBar(
             modifier = Modifier
@@ -42,17 +39,6 @@ fun HabiTrekNavigationBar(navigationViewModel: NavigationViewModel) {
                 onClick = {
                     if (!navigationViewModel.checkStack(NavRoutes.Home)) {
                         navigationViewModel.removeAllExceptHome()
-                    }
-                }
-            )
-
-            NavigationBarItem(
-                icon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
-                label = { Text("Search") },
-                selected = navigationViewModel.checkStack(NavRoutes.SearchScreen),
-                onClick = {
-                    if (!navigationViewModel.checkStack(NavRoutes.SearchScreen)) {
-                        navigationViewModel.addScreen(NavRoutes.SearchScreen)
                     }
                 }
             )

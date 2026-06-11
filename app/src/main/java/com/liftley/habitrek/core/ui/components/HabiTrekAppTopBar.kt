@@ -24,9 +24,7 @@ import com.liftley.habitrek.core.ui.navigation.NavigationViewModel
 @Composable
 fun HabiTrekTopBarSelector(navigationViewModel: NavigationViewModel) {
     when {
-        navigationViewModel.checkStack(NavRoutes.Home) || navigationViewModel.checkStack(
-            NavRoutes.SearchScreen
-        ) -> {
+        navigationViewModel.checkStack(NavRoutes.Home) -> {
             HabiTrekTopBarWithoutIconButton { "Habi Trek" }
         }
 

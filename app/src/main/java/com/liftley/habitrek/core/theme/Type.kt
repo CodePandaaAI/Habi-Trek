@@ -1,34 +1,49 @@
-package com.liftley.habitrek.core.designSystem.theme
+package com.liftley.habitrek.core.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
+import com.liftley.habitrek.R
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+@OptIn(ExperimentalTextApi::class)
+val CustomFontFamily = FontFamily(
+    Font(
+        resId = R.font.bricolage_grotesque_variable,
+        weight = FontWeight.ExtraLight,
+        variationSettings = FontVariation.Settings(FontWeight.ExtraLight, FontStyle.Normal)
     ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+    Font(
+        resId = R.font.bricolage_grotesque_variable,
+        weight = FontWeight.Light,
+        variationSettings = FontVariation.Settings(FontWeight.Light, FontStyle.Normal)
+    ),
+    Font(
+        resId = R.font.bricolage_grotesque_variable,
+        weight = FontWeight.Normal,
+        variationSettings = FontVariation.Settings(FontWeight.Normal, FontStyle.Normal)
+    ),
+    Font(
+        resId = R.font.bricolage_grotesque_variable,
+        weight = FontWeight.Medium,
+        variationSettings = FontVariation.Settings(FontWeight.Medium, FontStyle.Normal)
+    ),
+    Font(
+        resId = R.font.bricolage_grotesque_variable,
+        weight = FontWeight.SemiBold,
+        variationSettings = FontVariation.Settings(FontWeight.SemiBold, FontStyle.Normal)
+    ),
+    Font(
+        resId = R.font.bricolage_grotesque_variable,
+        weight = FontWeight.Bold,
+        variationSettings = FontVariation.Settings(FontWeight.Bold, FontStyle.Normal)
     )
-    */
+)
+val baseline = Typography()
+val Typography = Typography(
+    headlineMedium = baseline.headlineMedium.copy(fontFamily = CustomFontFamily),
+    titleLarge = baseline.titleLarge.copy(fontFamily = CustomFontFamily)
 )

@@ -6,15 +6,12 @@ import com.liftley.habitrek.data.local.dao.AiSummaryDao
 import com.liftley.habitrek.data.local.dao.CompletionDao
 import com.liftley.habitrek.data.local.dao.HabitDao
 import com.liftley.habitrek.data.local.database.HabitTrackerAppDatabase
-import com.liftley.habitrek.data.remote.api.SearchApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import jakarta.inject.Singleton
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -39,19 +36,4 @@ object ApplicationModule {
     @Provides
     @Singleton
     fun providesAiSummaryDao(database: HabitTrackerAppDatabase): AiSummaryDao = database.aiSummaryDao()
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl("https://gnews.io/api/v4/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideSearchApi(retrofit: Retrofit): SearchApi {
-        return retrofit.create(SearchApi::class.java)
-    }
 }

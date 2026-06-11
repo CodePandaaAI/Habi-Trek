@@ -6,6 +6,4 @@ sealed interface NavRoutes {
     data object AddHabit: NavRoutes
 
     data class ReviewHabit(val habitId: Int): NavRoutes
-
-    data object SearchScreen : NavRoutes
 }

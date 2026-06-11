@@ -22,7 +22,6 @@ import com.liftley.habitrek.core.ui.navigation.NavigationViewModel
 import com.liftley.habitrek.presentation.featureAddHabitScreen.AddHabitScreen
 import com.liftley.habitrek.presentation.featureHomeScreen.HomScreen
 import com.liftley.habitrek.presentation.featureReviewScreen.ReviewScreen
-import com.liftley.habitrek.presentation.featureWebSearch.SearchScreen
 
 @Composable
 fun HabiTrekNavHost() {
@@ -62,12 +61,6 @@ fun HabiTrekNavHost() {
                     NavRoutes.AddHabit -> {
                         NavEntry(key) {
                             AddHabitScreen(onAddHabitClick = { navigationViewModel.removeScreen() })
-                        }
-                    }
-
-                    NavRoutes.SearchScreen -> {
-                        NavEntry(key) {
-                            SearchScreen()
                         }
                     }
 
